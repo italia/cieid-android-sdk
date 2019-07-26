@@ -1,0 +1,75 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-android-extensions'
+apply plugin: 'maven'
+
+android {
+    compileSdkVersion 28
+
+    defaultConfig {
+        minSdkVersion 19
+        targetSdkVersion 28
+        versionCode 1
+        versionName "0.0.2"
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+
+        //ambienti
+        //PRODUZIONE buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it/idp/\""
+        //COLLAUDO
+        buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it:8443/idp/\""
+
+    }
+
+    buildTypes {
+        release {
+
+        }
+        debug {
+            debuggable true
+        }
+    }
+}
+
+
+ext {
+    supportLibraryVersion = '28.0.0'
+    okhttp_version = '4.0.1'
+    retrofit_version = '2.6.0'
+    kotlin_version = '1.3.41'
+}
+
+dependencies {
+
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    implementation "com.android.support:appcompat-v7:$supportLibraryVersion"
+
+    //network
+    implementation "com.squareup.okhttp3:okhttp:$okhttp_version"
+    implementation "com.squareup.okhttp3:logging-interceptor:$okhttp_version"
+    implementation "com.squareup.retrofit2:converter-scalars:$retrofit_version"
+    implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
+    implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
+    implementation 'com.squareup.okio:okio:2.2.2'
+
+    //rxjava
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.6'
+    implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
+
+}
+
+
+uploadArchives ()  {
+
+    repositories {
+        mavenDeployer {
+            repository(url: "https://mymavenrepo.com/repo/Rrwr33kgOjUcx88NxEXy/") {
+                authentication(
+                        userName: 'myMavenRepo',
+                        password: 'IpzsDeveloper')
+            }
+            pom.groupId = 'it.ipzs.cieidsdk'
+            pom.artifactId = 'cieidsdk'
+            pom.version = android.defaultConfig.versionName
+        }
+    }
+}
