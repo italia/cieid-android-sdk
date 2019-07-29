@@ -30,6 +30,7 @@ internal open class CieSignatureImpl : SignatureSpi() {
 
     }
 
+    @Throws(NullPointerException::class)
     override fun engineSign(): ByteArray {
 
         return CieIDSdk.ias!!.sign(byteToSign)!!
