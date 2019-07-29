@@ -2,17 +2,21 @@ package it.ipzs.cieidsdk.nfc
 
 
 import java.io.ByteArrayInputStream
+import java.lang.IllegalStateException
 import java.util.*
 
+internal class Asn1TagParseException(message : String) : IllegalStateException(message)
 
 internal class Asn1Tag @Throws(Exception::class)
 constructor(objects: Array<Any>) {
 
 
+
+
     var unusedBits: Byte = 0
     var tag: ByteArray = byteArrayOf()
     var data: ByteArray = byteArrayOf()
-    var children: List<Asn1Tag>? = null
+    var children: List<Asn1Tag> = emptyList()
     var startPos: Long = 0
     var endPos: Long = 0
     var constructed: Long = 0
@@ -39,21 +43,21 @@ constructor(objects: Array<Any>) {
 
     @Throws(Exception::class)
     fun child(tagNum: Int): Asn1Tag {
-        return children!![tagNum]
+        return children[tagNum]
     }
 
     @Throws(Exception::class)
     fun Child(tagNum: Int, tagCheck: Byte): Asn1Tag {
-        val tag = children!![tagNum]
+        val tag = children[tagNum]
         if (tag.tagRawNumber != tagCheck.toInt())
-            throw Exception("Check del tag fallito")
+            throw Asn1TagParseException("Check del tag fallito")
         return tag
     }
 
 
     @Throws(Exception::class)
     fun childWithTagID(tag: ByteArray): Asn1Tag? {
-        for (subTag in children!!) {
+        for (subTag in children) {
             if (subTag.tag.contentEquals(tag))
                 return subTag
         }
@@ -78,7 +82,7 @@ constructor(objects: Array<Any>) {
             var readPos = 0
             var tag = unsignedToBytes(asn.read().toByte())//96
             if (readPos.toLong() == length)
-                throw Exception()
+                throw Asn1TagParseException("Lunghezza non corretta")
             val tagVal = ArrayList<Byte>()
             readPos++
             tagVal.add(tag.toByte())
@@ -96,7 +100,7 @@ constructor(objects: Array<Any>) {
             }
             // leggo la lunghezza
             if (readPos.toLong() == length)
-                throw Exception()
+                throw Asn1TagParseException("Lunghezza non corretta")
             var len = unsignedToBytes(asn.read().toByte()).toLong()
             readPos++
             if (len > unsignedToBytes(0x80.toByte())) {
@@ -104,7 +108,7 @@ constructor(objects: Array<Any>) {
                 len = 0
                 for (i in 0 until lenlen) {
                     if (readPos.toLong() == length)
-                        throw Exception()
+                        throw Asn1TagParseException("Lunghezza non corretta")
                     val bTmp = unsignedToBytes(asn.read().toByte())
                     len = unsignedToBytes32((len shl 8 or bTmp.toLong()).toInt())
                     readPos++
@@ -112,7 +116,7 @@ constructor(objects: Array<Any>) {
             }
             val size = readPos + len
             if (size > length)
-                throw Exception("ASN1 non valido")
+                throw Asn1TagParseException("ASN1 non valido")
             if (tagVal.size == 1 && tagVal[0].toInt() == 0 && len == 0L) {
                 return null
             }
