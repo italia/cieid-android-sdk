@@ -82,6 +82,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
 
 
     @SuppressLint("CheckResult")
+    @Throws(NullPointerException::class)
     fun call(certificate: ByteArray) {
 
         val idpService: IdpService = NetworkClient.get(certificate).idpService
