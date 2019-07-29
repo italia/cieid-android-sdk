@@ -28,13 +28,12 @@ internal class ApduResponse {
     }
 
     @Throws(Exception::class)
-    protected fun bytesToHex(bytes: ByteArray?): String {
-        val sb = StringBuilder(bytes!!.size * 2)
+    private fun bytesToHex(bytes: ByteArray): String {
+        val sb = StringBuilder(bytes.size * 2)
         for (i in bytes.indices) {
             sb.append(String.format("%02x", bytes[i]))
         }
         return sb.toString()
     }
-
 
 }
