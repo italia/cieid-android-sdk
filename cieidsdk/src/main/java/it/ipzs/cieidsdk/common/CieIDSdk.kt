@@ -84,7 +84,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     @SuppressLint("CheckResult")
     fun call(certificate: ByteArray) {
 
-        val idpService: IdpService = NetworkClient.get(certificate).idpService
+        val idpService: IdpService = NetworkClient(certificate).idpService
         val mapValues = hashMapOf<String, String>().apply {
             put(deepLinkInfo.name!!, deepLinkInfo.value!!)
             put(IdpService.authnRequest, deepLinkInfo.authnRequest ?: "")

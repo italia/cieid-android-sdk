@@ -20,38 +20,23 @@ import javax.net.ssl.TrustManagerFactory
 import javax.net.ssl.X509TrustManager
 
 
-internal class NetworkClient private constructor() {
+internal class NetworkClient(private val certificate : ByteArray) {
 
-
-    companion object {
-
-        private var instance: NetworkClient? = null
-        private lateinit var certificate : ByteArray
-
-        fun get(certificate : ByteArray): NetworkClient {
-            if (instance == null) {
-                val sslContext = SSLContext.getInstance("TLSv1.2")
-                sslContext.init(null, null, null)
-                instance = NetworkClient()
-                Companion.certificate = certificate
-            }
-            return instance!!
-        }
-
-        fun clear() {
-            instance = null
-        }
+    init {
+        val sslContext = SSLContext.getInstance("TLSv1.2")
+        sslContext.init(null, null, null)
     }
+
 
     private val okHttpClient: OkHttpClient by lazy { okhttpInitializer() }
 
     private fun okhttpInitializer(): OkHttpClient {
 
         Security.removeProvider(CieProvider.PROVIDER)
-        val cieProvider  = CieProvider()
+        val cieProvider = CieProvider()
         Security.insertProviderAt(cieProvider, 1)
 
-       val certificatePinner = CertificatePinner.Builder()
+        val certificatePinner = CertificatePinner.Builder()
             .add(Endpoints.BASE_URL_CERTIFICATE, Endpoints.PIN_ROOT)
             .add(Endpoints.BASE_URL_CERTIFICATE, Endpoints.PIN_LEAF)
             .build()
@@ -59,12 +44,12 @@ internal class NetworkClient private constructor() {
         val builder = OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
             .certificatePinner(certificatePinner)
-                .connectTimeout(15, TimeUnit.SECONDS)
-                .readTimeout(15, TimeUnit.SECONDS)
-                .writeTimeout(15, TimeUnit.SECONDS)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
+            .writeTimeout(15, TimeUnit.SECONDS)
 
-        val cieKeyStore : KeyStore = KeyStore.getInstance(CieProvider.PROVIDER)
-        cieKeyStore.load(ByteArrayInputStream(certificate),null)
+        val cieKeyStore: KeyStore = KeyStore.getInstance(CieProvider.PROVIDER)
+        cieKeyStore.load(ByteArrayInputStream(certificate), null)
 
         val kmf = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm())
         kmf.init(cieKeyStore, null)
@@ -81,40 +66,30 @@ internal class NetworkClient private constructor() {
         sslContext.init(keyManagers, null, null)
 
 
-        return builder.sslSocketFactory(sslContext.socketFactory,trustManager).build()
+        return builder.sslSocketFactory(sslContext.socketFactory, trustManager).build()
 
 
     }
 
-    private var retrofitWithRx: Retrofit? = null
+    private val retrofitWithRx: Retrofit by lazy {
+        Retrofit.Builder().baseUrl(BuildConfig.BASE_URL_IDP)
+            .client(okHttpClient)
+            .addConverterFactory(ScalarsConverterFactory.create())
+            .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+            .build()
+    }
 
 
     private val loggingInterceptor: HttpLoggingInterceptor
             by lazy {
                 val interceptor = HttpLoggingInterceptor()
-                interceptor.level = if (CieIDSdk.enableLog) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
+                interceptor.level =
+                    if (CieIDSdk.enableLog) HttpLoggingInterceptor.Level.BODY else HttpLoggingInterceptor.Level.NONE
                 interceptor
             }
 
 
-    private fun <T> createService(serviceClass: Class<T>): T {
-        return createService(serviceClass, okHttpClient)
-    }
-
-
-    private fun <T> createService(serviceClass: Class<T>, client: OkHttpClient): T {
-        if (retrofitWithRx == null) {
-            retrofitWithRx = Retrofit.Builder().baseUrl(BuildConfig.BASE_URL_IDP)
-                    .client(client)
-                    .addConverterFactory(ScalarsConverterFactory.create())
-                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
-                    .build()
-        }
-        return retrofitWithRx!!.create(serviceClass)
-    }
-
-
-    val idpService: IdpService by lazy { createService(IdpService::class.java) }
+    val idpService: IdpService by lazy { retrofitWithRx.create(IdpService::class.java) }
 
 
 }
