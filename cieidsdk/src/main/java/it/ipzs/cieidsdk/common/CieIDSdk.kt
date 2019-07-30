@@ -213,7 +213,9 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     /**
     Check if device has NFC supports
      */
-    fun hasDeviceNFC(): Boolean = nfcAdapter != null
+    fun hasFeatureNFC(activity: Activity): Boolean {
+        return activity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC);
+    }
 
     /**
      *  Check if NFC is enabled on Device
