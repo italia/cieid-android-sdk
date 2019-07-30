@@ -89,7 +89,7 @@ constructor(objects: Array<Any>) {
             if (tag and 0x1f == 0x1f) {
                 while (true) {
                     if (readPos.toLong() == length)
-                        throw Exception()
+                        throw Asn1TagParseException("Lunghezza non corretta")
                     tag = asn.read()
                     readPos++
                     tagVal.add(tag.toByte())

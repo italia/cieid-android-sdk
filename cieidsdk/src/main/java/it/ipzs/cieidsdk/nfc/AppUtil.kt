@@ -7,6 +7,8 @@ import java.security.SecureRandom
  */
 internal class AppUtil {
 
+    internal class AppUtilException(message : String) : IllegalArgumentException(message)
+
     companion object {
 
         /**
@@ -137,7 +139,7 @@ internal class AppUtil {
                     (value and 0xff).toByte()
                 )
             }
-            throw Exception("dati troppo lunghi")
+            throw AppUtilException("dati troppo lunghi")
         }
 
         /**
@@ -180,7 +182,7 @@ internal class AppUtil {
                     (value and 0xff).toByte()
                 )
             }
-            throw Exception("tag troppo lungo")
+            throw AppUtilException("tag troppo lungo")
         }
 
         @Throws(Exception::class)
@@ -316,7 +318,7 @@ internal class AppUtil {
                 if (data[i] == 0x80.toByte())
                     break
                 if (data[i].toInt() != 0x00)
-                    throw Exception("Padding ISO non presente")
+                    throw AppUtilException("Padding ISO non presente")
                 i--
             }
             return getLeft(data, i)

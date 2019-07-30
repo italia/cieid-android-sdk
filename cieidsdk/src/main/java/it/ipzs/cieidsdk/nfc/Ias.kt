@@ -1,12 +1,5 @@
 package it.ipzs.cieidsdk.nfc
 
-/**
- * Created by m.recupero on 06/03/18.
- *
- *
- */
-
-
 import android.nfc.tech.IsoDep
 import it.ipzs.cieidsdk.exceptions.BlockedPinException
 import it.ipzs.cieidsdk.exceptions.NoCieException
@@ -25,6 +18,12 @@ import kotlin.experimental.or
  * Classe per la gestione delle funzionalità di autenticazione
  */
 internal class Ias constructor(val isoDep: IsoDep) {
+
+    internal class InternalAuthenticationException(message : String) : IllegalArgumentException(message)
+    internal class ReadPublicKeyException : Throwable()
+    internal class ResponseSMException(message : String) : IllegalArgumentException(message)
+    internal class SendApduException(message : String) : IllegalArgumentException(message)
+
 
     private var index = 0
     private val CIE_AID = byteArrayOf(0xA0.toByte(), 0x00, 0x00, 0x00, 0x00, 0x39)
@@ -786,7 +785,7 @@ internal class Ias constructor(val isoDep: IsoDep) {
         intAuthResp = rsaIntAuthKey.encrypt(AppUtil.getSub(resp.response, 8, resp.response.size - 8))
 
         if (java.lang.Byte.compare(intAuthResp[0], 0x6a.toByte()) != 0)
-            throw Exception("Errore nell'autenticazione del chip- Byte.compare(intAuthResp[0], (byte)0x6a) != 0")
+            throw InternalAuthenticationException("Errore nell'autenticazione del chip- Byte.compare(intAuthResp[0], (byte)0x6a) != 0")
 
         val PRND2 = AppUtil.getSub(intAuthResp, 1, intAuthResp.size - 32 - 2)
         val hashICC = AppUtil.getSub(intAuthResp, PRND2.size + 1, 32)
@@ -802,11 +801,11 @@ internal class Ias constructor(val isoDep: IsoDep) {
         val calcHashIFD = Sha256.encrypt(toHashIFD)
 
         if (AppUtil.bytesToHex(calcHashIFD) != AppUtil.bytesToHex(hashICC))
-            throw Exception("Errore nell'autenticazione del chip (calcHashIFD,hashICC)")
+            throw InternalAuthenticationException("Errore nell'autenticazione del chip (calcHashIFD,hashICC)")
 
 
         if (java.lang.Byte.compare(intAuthResp[intAuthResp.size - 1], 0xbc.toByte()) != 0)
-            throw Exception("Errore nell'autenticazione del chip AppUtil.byteCompare(intAuthResp[intAuthResp.length - 1],0xcb")
+            throw InternalAuthenticationException("Errore nell'autenticazione del chip AppUtil.byteCompare(intAuthResp[intAuthResp.length - 1],0xcb")
 
         val ba888 = AppUtil.getRight(challengeResp.response, 4)
         val ba889 = AppUtil.getRight(rndIFD, 4)
@@ -1237,7 +1236,7 @@ internal class Ias constructor(val isoDep: IsoDep) {
         val dappKey: ByteArray = readFile(0x1004)
         dappModule = byteArrayOf()
         if (this.dappPubKey.isNotEmpty())
-            throw java.lang.Exception()
+            throw ReadPublicKeyException()
         //selectAidCie()
         val asn1 = Asn1Tag.parse(dappKey, false)
         dappModule = asn1!!.child(0).data
@@ -1426,7 +1425,7 @@ internal class Ias constructor(val isoDep: IsoDep) {
                 val apduResponse = transmit(apdu)
                 //curresp = apduResponse.getResponse();
                 if (apduResponse.swHex != "9000")
-                    throw Exception("Errore apdu")
+                    throw SendApduException("Errore apdu")
                 if (i == data.size) {
                     return getResp(apduResponse)
                 }
@@ -1525,7 +1524,7 @@ internal class Ias constructor(val isoDep: IsoDep) {
         do {
             if (resp[index].compareTo(0x99.toByte()) == 0) {
                 if (resp[index + 1].compareTo(0x02.toByte()) != 0)
-                    throw Exception("Errore nella verifica del SM - lunghezza del DataObject")
+                    throw ResponseSMException("Errore nella verifica del SM - lunghezza del DataObject")
                 dataObj = AppUtil.getSub(resp, index, 4)
                 sw = resp[index + 2].toInt().shl(8) or resp[index + 3].toInt()
                 setIndex(index, 4)//index += 4;
@@ -1538,10 +1537,10 @@ internal class Ias constructor(val isoDep: IsoDep) {
                 )
                 setIndex(index, 1)//index++;
                 if (resp[index].compareTo(0x08.toByte()) != 0)
-                    throw Exception("Errore nella verifica del SM - lunghezza del MAC errata")
+                    throw ResponseSMException("Errore nella verifica del SM - lunghezza del MAC errata")
                 setIndex(index, 1)//index++;
                 if (!Arrays.equals(calcMac, AppUtil.getSub(resp, index, 8)))
-                    throw Exception("Errore nella verifica del SM - MAC non corrispondente")
+                    throw ResponseSMException("Errore nella verifica del SM - MAC non corrispondente")
                 setIndex(index, 8)//index += 8;
                 continue
             }
@@ -1582,7 +1581,7 @@ internal class Ias constructor(val isoDep: IsoDep) {
                 }
                 continue
             } else
-                throw Exception("Tag non previsto nella risposta in SM")
+                throw ResponseSMException("Tag non previsto nella risposta in SM")
             //index = index + resp[index + 1] + 1;
         } while (index < resp.size)
 
