@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.nfc.NfcAdapter
 import android.nfc.NfcManager
@@ -217,7 +218,9 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     /**
      *  Check if NFC is enabled on Device
      */
-    fun isNFCEnabled(): Boolean = hasDeviceNFC() && nfcAdapter?.isEnabled ?: false
+    fun hasFeatureNFC(activity: Activity): Boolean {
+        return activity.packageManager.hasSystemFeature(PackageManager.FEATURE_NFC)
+    }
 
     /**
     Open NFC Settings PAge
