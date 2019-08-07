@@ -81,6 +81,7 @@ interface Callback {
 
 object CieIDSdk : NfcAdapter.ReaderCallback {
 
+	val isoDepTimeout: Int = 2000
 
     @SuppressLint("CheckResult")
     fun call(certificate: ByteArray) {
@@ -143,6 +144,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
         try {
             callback?.onEvent(Event(Event.EventValue.ON_TAG_DISCOVERED))
             val isoDep = IsoDep.get(tag)
+            isoDep.timeout = isoDepTimeout
             isoDep.connect()
             ias = Ias(isoDep)
             ias!!.getIdServizi()
