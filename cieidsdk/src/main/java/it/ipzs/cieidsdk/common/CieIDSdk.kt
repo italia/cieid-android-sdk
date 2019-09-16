@@ -81,7 +81,14 @@ interface Callback {
 
 object CieIDSdk : NfcAdapter.ReaderCallback {
 
-	val isoDepTimeout: Int = 2000
+    private var nfcAdapter: NfcAdapter? = null
+    private var callback: Callback? = null
+    internal var deepLinkInfo: DeepLinkInfo = DeepLinkInfo()
+    internal var ias: Ias? = null
+    var enableLog: Boolean = false
+    var pin: String = ""
+    private const val isoDepTimeout: Int = 2000
+
 
     @SuppressLint("CheckResult")
     fun call(certificate: ByteArray) {
@@ -147,6 +154,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             isoDep.timeout = isoDepTimeout
             isoDep.connect()
             ias = Ias(isoDep)
+
             ias!!.getIdServizi()
             ias!!.startSecureChannel(pin)
             val certificate = ias!!.readCertCie()
@@ -164,22 +172,16 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
         }
     }
 
-    private var nfcAdapter: NfcAdapter? = null
-    private var callback: Callback? = null
 
-
-    var enableLog: Boolean = false
-
-
-    fun start(activity: Activity, callback: Callback) {
-        CieIDSdk.callback = callback
+    /**
+     * Set the SDK callback and init NFC adapter.
+     * start method must be called before accessing nfc features
+     * */
+    fun start(activity: Activity, cb: Callback) {
+        callback = cb
         nfcAdapter = (activity.getSystemService(Context.NFC_SERVICE) as NfcManager).defaultAdapter
     }
 
-
-    var pin: String = ""
-    internal var deepLinkInfo: DeepLinkInfo = DeepLinkInfo()
-    internal var ias: Ias? = null
 
     fun setUrl(url: String) {
         val appLinkData = Uri.parse(url)
@@ -213,16 +215,16 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     }
 
     /**
-    Check if device has NFC supports
+     *  Return true if device has NFC supports
      */
-    fun hasDeviceNFC(): Boolean = nfcAdapter != null
+    fun hasFeatureNFC(context: Activity): Boolean {
+        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_NFC)
+    }
 
     /**
-     *  Check if NFC is enabled on Device
+     *  Return true if NFC is enabled on device
      */
-    fun hasFeatureNFC(activity: Activity): Boolean {
-        return activity.packageManager.hasSystemFeature(PackageManager.FEATURE_NFC)
-    }
+    fun isNFCEnabled(activity: Activity): Boolean = hasFeatureNFC(activity) && nfcAdapter?.isEnabled ?: false
 
     /**
     Open NFC Settings PAge

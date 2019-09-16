@@ -3,8 +3,8 @@ package it.ipzs.cieidsdk.sampleapp
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import it.ipzs.cieidsdk.common.Callback
 import it.ipzs.cieidsdk.common.CieIDSdk
 import it.ipzs.cieidsdk.common.Event
