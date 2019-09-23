@@ -38,7 +38,6 @@ internal class NetworkClient(private val certificate : ByteArray) {
 
         val certificatePinner = CertificatePinner.Builder()
             .add(Endpoints.BASE_URL_CERTIFICATE, Endpoints.PIN_ROOT)
-            .add(Endpoints.BASE_URL_CERTIFICATE, Endpoints.PIN_LEAF)
             .build()
 
         val builder = OkHttpClient.Builder()

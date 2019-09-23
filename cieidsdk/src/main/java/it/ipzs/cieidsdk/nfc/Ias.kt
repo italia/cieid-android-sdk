@@ -3,6 +3,7 @@ package it.ipzs.cieidsdk.nfc
 import android.nfc.tech.IsoDep
 import it.ipzs.cieidsdk.exceptions.BlockedPinException
 import it.ipzs.cieidsdk.exceptions.NoCieException
+import it.ipzs.cieidsdk.exceptions.PinInputNotValidException
 import it.ipzs.cieidsdk.exceptions.PinNotValidException
 import it.ipzs.cieidsdk.nfc.algorithms.Algoritmi
 import it.ipzs.cieidsdk.nfc.algorithms.RSA
@@ -650,6 +651,9 @@ internal class Ias constructor(val isoDep: IsoDep) {
     @Throws(Exception::class)
     private fun verifyPin(pin: String): Int {
         CieIDSdkLogger.log("verifyPin()")
+        if(pin.length!=8){
+            throw PinInputNotValidException()
+        }
         val verifyPIN = byteArrayOf(0x00, 0x20, 0x00, CIE_PIN_ID)
         val response = sendApduSM(verifyPIN, pin.toByteArray(), null)
         val nt = AppUtil.bytesToHex(response.swByte)
@@ -751,7 +755,7 @@ internal class Ias constructor(val isoDep: IsoDep) {
         toHash = AppUtil.appendByteArray(toHash, dh_q)
         d1 = Sha256.encrypt(toHash)
 
-        toSign = byteArrayOf()//non sono sicuro se viene reinizializzato o va in append...
+        toSign = byteArrayOf()
         toSign = AppUtil.appendByte(toSign, 0x6a.toByte())
         toSign = AppUtil.appendByteArray(toSign, PRND)
         toSign = AppUtil.appendByteArray(toSign, d1)
@@ -882,20 +886,16 @@ internal class Ias constructor(val isoDep: IsoDep) {
         val getKeyDoup = byteArrayOf(0, 0xcb.toByte(), 0x3f, 0xff.toByte())
         val getKeyDuopData = byteArrayOf(
             0x4d,
-            0x0C,
+            0x09,
             0x70,
-            0x0A,
+            0x07,
             0xBF.toByte(),
             0xA0.toByte(),
-            (CIE_KEY_ExtAuth_ID and 0x7f),
-            0x06,
+            0x04,
+            0x03,
             0x7F,
             0x49,
-            0x03,
-            0x5F,
-            0x20,
-            0x80.toByte()
-        )
+            0x80.toByte())
         val response = sendApdu(getKeyDoup, getKeyDuopData, null)
         val asn1 = Asn1Tag.parse(response.response, true)
         caModule = asn1!!.child(0).child(0).Child(0, 0x81.toByte()).data
