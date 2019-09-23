@@ -14,9 +14,10 @@ android {
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         //ambienti
-        //PRODUZIONE buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it/idp/\""
+        //PRODUZIONE
+        buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it/idp/\""
         //COLLAUDO
-        buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it:8443/idp/\""
+        //buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it:8443/idp/\""
 
     }
 
@@ -57,19 +58,3 @@ dependencies {
 
 }
 
-
-uploadArchives ()  {
-
-    repositories {
-        mavenDeployer {
-            repository(url: "https://mymavenrepo.com/repo/Rrwr33kgOjUcx88NxEXy/") {
-                authentication(
-                        userName: 'myMavenRepo',
-                        password: 'IpzsDeveloper')
-            }
-            pom.groupId = 'it.ipzs.cieidsdk'
-            pom.artifactId = 'cieidsdk'
-            pom.version = android.defaultConfig.versionName
-        }
-    }
-}

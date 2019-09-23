@@ -17,6 +17,7 @@ import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
 import it.ipzs.cieidsdk.exceptions.BlockedPinException
 import it.ipzs.cieidsdk.exceptions.NoCieException
+import it.ipzs.cieidsdk.exceptions.PinInputNotValidException
 import it.ipzs.cieidsdk.exceptions.PinNotValidException
 import it.ipzs.cieidsdk.network.NetworkClient
 import it.ipzs.cieidsdk.network.service.IdpService
@@ -51,10 +52,11 @@ class Event {
         //error
         AUTHENTICATION_ERROR,
         GENERAL_ERROR,
-        ON_NO_INTERNET_CONNECTION
+        ON_NO_INTERNET_CONNECTION,
+        ON_PIN_INPUT_ERROR
     }
 
-    private var tentativi: Int = 0
+    var tentativi: Int = 0
     private val eventValue: EventValue
 
     constructor (event: EventValue, case: Int) {
@@ -102,6 +104,9 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
                     if (idpResponse.body() != null) {
                         val codiceServer =
                             idpResponse.body()!!.string().split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
+                        if(!checkCodiceServer(codiceServer)){
+                            callback?.onEvent(Event(Event.EventValue.GENERAL_ERROR))
+                        }
                         val url =
                             deepLinkInfo.nextUrl + "?" + deepLinkInfo.name + "=" + deepLinkInfo.value + "&login=1&codice=" + codiceServer
                         callback?.onSuccess(url)
@@ -139,12 +144,21 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             })
     }
 
+    private fun checkCodiceServer(codiceServer: String): Boolean {
+        val regex = Regex("^[0-9]+$")
+        if(codiceServer.length==16 && regex.matches(codiceServer)){
+            return true
+        }
+        return false
+    }
+
 
     override fun onTagDiscovered(tag: Tag?) {
         try {
             callback?.onEvent(Event(Event.EventValue.ON_TAG_DISCOVERED))
             val isoDep = IsoDep.get(tag)
             isoDep.connect()
+            isoDep.timeout = 3000
             ias = Ias(isoDep)
             ias!!.getIdServizi()
             ias!!.startSecureChannel(pin)
@@ -155,6 +169,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             CieIDSdkLogger.log(throwable.toString())
             when (throwable) {
                 is PinNotValidException -> callback?.onEvent(Event(Event.EventValue.ON_PIN_ERROR, throwable.tentativi))
+                is PinInputNotValidException -> callback?.onEvent(Event(Event.EventValue.ON_PIN_INPUT_ERROR))
                 is BlockedPinException -> callback?.onEvent(Event(Event.EventValue.ON_CARD_PIN_LOCKED))
                 is NoCieException -> callback?.onEvent(Event(Event.EventValue.ON_TAG_DISCOVERED_NOT_CIE))
                 is TagLostException -> callback?.onEvent(Event(Event.EventValue.ON_TAG_LOST))
@@ -215,7 +230,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     Check if device has NFC supports
      */
     fun hasFeatureNFC(activity: Activity): Boolean {
-        return activity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_NFC);
+        return activity.packageManager.hasSystemFeature(PackageManager.FEATURE_NFC);
     }
 
     /**
