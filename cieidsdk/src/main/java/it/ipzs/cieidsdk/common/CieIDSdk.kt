@@ -126,7 +126,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
                         val codiceServer =
                             idpResponse.body()!!.string().split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
                         if(!checkCodiceServer(codiceServer)){
-                            callback?.onEvent(Event(Event.EventValue.GENERAL_ERROR))
+                            callback?.onEvent(Event(Event.EventError.GENERAL_ERROR))
                         }
                         val url =
                             deepLinkInfo.nextUrl + "?" + deepLinkInfo.name + "=" + deepLinkInfo.value + "&login=1&codice=" + codiceServer
