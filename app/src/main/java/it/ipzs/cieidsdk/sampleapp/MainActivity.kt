@@ -1,7 +1,6 @@
 package it.ipzs.cieidsdk.sampleapp
 
 import android.os.Bundle
-import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import it.ipzs.cieidsdk.common.Callback
 import it.ipzs.cieidsdk.common.CieIDSdk
@@ -9,11 +8,12 @@ import it.ipzs.cieidsdk.common.Event
 import kotlinx.android.synthetic.main.activity_main.*
 import android.text.InputType
 import android.widget.EditText
-import android.support.v7.app.AlertDialog
 import android.view.View.GONE
 import android.view.View.VISIBLE
 import android.webkit.WebView
 import android.webkit.WebViewClient
+import androidx.appcompat.app.AlertDialog
+import androidx.appcompat.app.AppCompatActivity
 
 
 class MainActivity : AppCompatActivity(), Callback {

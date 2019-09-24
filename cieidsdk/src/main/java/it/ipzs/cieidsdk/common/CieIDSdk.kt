@@ -70,7 +70,7 @@ class Event {
         override val nameEvent: String = name
     }
 
-    private var tentativi: Int = 0
+    var tentativi: Int = 0
     private val eventValue: EventValue
 
     constructor (event: EventValue, case: Int) {
