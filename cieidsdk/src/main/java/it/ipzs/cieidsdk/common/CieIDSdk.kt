@@ -35,28 +35,42 @@ val CERTIFICATE_REVOKED: CharSequence = "SSLV3_ALERT_CERTIFICATE_REVOKED"
 
 class Event {
 
-    enum class EventValue {
+    interface EventValue {
+        val nameEvent: String
+    }
+
+    enum class EventTag : EventValue {
         //tag
         ON_TAG_DISCOVERED_NOT_CIE,
         ON_TAG_DISCOVERED,
-        ON_TAG_LOST,
+        ON_TAG_LOST;
 
+        override val nameEvent: String = name
+    }
+    enum class EventCard: EventValue {
         //card
         ON_CARD_PIN_LOCKED,
-        ON_PIN_ERROR,
+        ON_PIN_ERROR;
 
+        override val nameEvent: String = name
+
+    }
+    enum class EventCertificate : EventValue {
         //certificate
         CERTIFICATE_EXPIRED,
-        CERTIFICATE_REVOKED,
+        CERTIFICATE_REVOKED;
 
+        override val nameEvent: String = name
+    }
+    enum class EventError : EventValue {
         //error
         AUTHENTICATION_ERROR,
         GENERAL_ERROR,
-        ON_NO_INTERNET_CONNECTION,
-        ON_PIN_INPUT_ERROR
+        ON_NO_INTERNET_CONNECTION;
+        override val nameEvent: String = name
     }
 
-    var tentativi: Int = 0
+    private var tentativi: Int = 0
     private val eventValue: EventValue
 
     constructor (event: EventValue, case: Int) {
@@ -69,7 +83,7 @@ class Event {
     }
 
     override fun toString(): String {
-        return eventValue.name
+        return eventValue.nameEvent
     }
 }
 
@@ -83,9 +97,16 @@ interface Callback {
 
 object CieIDSdk : NfcAdapter.ReaderCallback {
 
+    private var nfcAdapter: NfcAdapter? = null
+    private var callback: Callback? = null
+    internal var deepLinkInfo: DeepLinkInfo = DeepLinkInfo()
+    internal var ias: Ias? = null
+    var enableLog: Boolean = false
+    var pin: String = ""
+    private const val isoDepTimeout: Int = 4000
+
 
     @SuppressLint("CheckResult")
-    @Throws(NullPointerException::class)
     fun call(certificate: ByteArray) {
 
         val idpService: IdpService = NetworkClient(certificate).idpService
@@ -112,7 +133,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
                         callback?.onSuccess(url)
 
                     } else {
-                        callback?.onEvent(Event(Event.EventValue.AUTHENTICATION_ERROR))
+                        callback?.onEvent(Event(Event.EventError.AUTHENTICATION_ERROR))
                     }
 
                 }
@@ -123,7 +144,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
                     when (e) {
                         is SocketTimeoutException , is UnknownHostException -> {
                             CieIDSdkLogger.log("SocketTimeoutException or UnknownHostException")
-                            callback?.onEvent(Event(Event.EventValue.ON_NO_INTERNET_CONNECTION))
+                            callback?.onEvent(Event(Event.EventError.ON_NO_INTERNET_CONNECTION))
 
                         }
                         is SSLProtocolException -> {
@@ -131,8 +152,8 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
                             CieIDSdkLogger.log("SSLProtocolException")
                             e.message?.let {
                                 when {
-                                    it.contains(CERTIFICATE_EXPIRED) -> callback?.onEvent(Event(Event.EventValue.CERTIFICATE_EXPIRED))
-                                    it.contains(CERTIFICATE_REVOKED) -> callback?.onEvent(Event(Event.EventValue.CERTIFICATE_REVOKED))
+                                    it.contains(CERTIFICATE_EXPIRED) -> callback?.onEvent(Event(Event.EventCertificate.CERTIFICATE_EXPIRED))
+                                    it.contains(CERTIFICATE_REVOKED) -> callback?.onEvent(Event(Event.EventCertificate.CERTIFICATE_REVOKED))
                                     else -> callback?.onError(e)
                                 }
                             }
@@ -155,11 +176,12 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
 
     override fun onTagDiscovered(tag: Tag?) {
         try {
-            callback?.onEvent(Event(Event.EventValue.ON_TAG_DISCOVERED))
+            callback?.onEvent(Event(Event.EventTag.ON_TAG_DISCOVERED))
             val isoDep = IsoDep.get(tag)
+            isoDep.timeout = isoDepTimeout
             isoDep.connect()
-            isoDep.timeout = 3000
             ias = Ias(isoDep)
+
             ias!!.getIdServizi()
             ias!!.startSecureChannel(pin)
             val certificate = ias!!.readCertCie()
@@ -168,32 +190,25 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
         } catch (throwable: Throwable) {
             CieIDSdkLogger.log(throwable.toString())
             when (throwable) {
-                is PinNotValidException -> callback?.onEvent(Event(Event.EventValue.ON_PIN_ERROR, throwable.tentativi))
-                is PinInputNotValidException -> callback?.onEvent(Event(Event.EventValue.ON_PIN_INPUT_ERROR))
-                is BlockedPinException -> callback?.onEvent(Event(Event.EventValue.ON_CARD_PIN_LOCKED))
-                is NoCieException -> callback?.onEvent(Event(Event.EventValue.ON_TAG_DISCOVERED_NOT_CIE))
-                is TagLostException -> callback?.onEvent(Event(Event.EventValue.ON_TAG_LOST))
+                is PinNotValidException -> callback?.onEvent(Event(Event.EventCard.ON_PIN_ERROR, throwable.tentativi))
+                is BlockedPinException -> callback?.onEvent(Event(Event.EventCard.ON_CARD_PIN_LOCKED))
+                is NoCieException -> callback?.onEvent(Event(Event.EventTag.ON_TAG_DISCOVERED_NOT_CIE))
+                is TagLostException -> callback?.onEvent(Event(Event.EventTag.ON_TAG_LOST))
                 else -> callback?.onError(throwable)
             }
         }
     }
 
-    private var nfcAdapter: NfcAdapter? = null
-    private var callback: Callback? = null
 
-
-    var enableLog: Boolean = false
-
-
-    fun start(activity: Activity, callback: Callback) {
-        CieIDSdk.callback = callback
+    /**
+     * Set the SDK callback and init NFC adapter.
+     * start method must be called before accessing nfc features
+     * */
+    fun start(activity: Activity, cb: Callback) {
+        callback = cb
         nfcAdapter = (activity.getSystemService(Context.NFC_SERVICE) as NfcManager).defaultAdapter
     }
 
-
-    var pin: String = ""
-    internal var deepLinkInfo: DeepLinkInfo = DeepLinkInfo()
-    internal var ias: Ias? = null
 
     fun setUrl(url: String) {
         val appLinkData = Uri.parse(url)
@@ -227,11 +242,16 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     }
 
     /**
-    Check if device has NFC supports
+     *  Return true if device has NFC supports
      */
-    fun hasFeatureNFC(activity: Activity): Boolean {
-        return activity.packageManager.hasSystemFeature(PackageManager.FEATURE_NFC);
+    fun hasFeatureNFC(context: Activity): Boolean {
+        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_NFC)
     }
+
+    /**
+     *  Return true if NFC is enabled on device
+     */
+    fun isNFCEnabled(activity: Activity): Boolean = hasFeatureNFC(activity) && nfcAdapter?.isEnabled ?: false
 
     /**
     Open NFC Settings PAge
