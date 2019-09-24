@@ -44,18 +44,22 @@ class CieModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMod
 
     @ReactMethod
     fun start(callback: com.facebook.react.bridge.Callback){
-        CieIDSdk.start(getCurrentActivity()!!, this)
-        callback.invoke(null,null)
+        try {
+            CieIDSdk.start(getCurrentActivity()!!, this)
+            callback.invoke(null, null)
+        } catch (e: RuntimeException) {
+            callback.invoke(e.message,null)
+        }
     }
 
     @ReactMethod
     fun isNFCEnabled(callback: com.facebook.react.bridge.Callback) {
-        callback.invoke(null,CieIDSdk.isNFCEnabled(getCurrentActivity()!!))
+        callback.invoke(CieIDSdk.isNFCEnabled(getCurrentActivity()!!))
     }
 
     @ReactMethod
     fun hasNFCFeature(callback: com.facebook.react.bridge.Callback) {
-        callback.invoke(null,CieIDSdk.hasFeatureNFC(getCurrentActivity()!!))
+        callback.invoke(CieIDSdk.hasFeatureNFC(getCurrentActivity()!!))
     }
 
     @ReactMethod
@@ -70,14 +74,22 @@ class CieModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMod
 
     @ReactMethod
     fun startListeningNFC(callback: com.facebook.react.bridge.Callback) {
-        CieIDSdk.startNFCListening(getCurrentActivity()!!)
-        callback.invoke(null,null)
+        try {
+            CieIDSdk.startNFCListening(getCurrentActivity()!!)
+            callback.invoke(null,null)
+        } catch (e: RuntimeException) {
+            callback.invoke(e.message,null)
+        }
     }
 
     @ReactMethod
     fun stopListeningNFC(callback: com.facebook.react.bridge.Callback) {
-        CieIDSdk.stopNFCListening(getCurrentActivity()!!)
-        callback.invoke(null,null)
+        try {
+            CieIDSdk.stopNFCListening(getCurrentActivity()!!)
+            callback.invoke(null, null)
+        } catch (e: RuntimeException) {
+            callback.invoke(e.message,null)
+        }
     }
 
     @ReactMethod

@@ -45,7 +45,7 @@ class MainActivity : AppCompatActivity(), Callback {
         //configurazione cieidsdk
         CieIDSdk.start(this, this)
         //passare il pin inserito dall'utente
-        CieIDSdk.pin = "81813213"
+        CieIDSdk.pin = "12345678"
         //settare la url caricata dalla webview su /OpenApp
         CieIDSdk.setUrl(url)
         //abilitare i log
