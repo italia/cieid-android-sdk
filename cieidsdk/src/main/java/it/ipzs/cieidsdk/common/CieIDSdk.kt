@@ -66,6 +66,7 @@ class Event {
         //error
         AUTHENTICATION_ERROR,
         GENERAL_ERROR,
+        PIN_INPUT_ERROR,
         ON_NO_INTERNET_CONNECTION;
         override val nameEvent: String = name
     }
@@ -191,6 +192,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             CieIDSdkLogger.log(throwable.toString())
             when (throwable) {
                 is PinNotValidException -> callback?.onEvent(Event(Event.EventCard.ON_PIN_ERROR, throwable.tentativi))
+                is PinInputNotValidException -> callback?.onEvent(Event(Event.EventError.PIN_INPUT_ERROR))
                 is BlockedPinException -> callback?.onEvent(Event(Event.EventCard.ON_CARD_PIN_LOCKED))
                 is NoCieException -> callback?.onEvent(Event(Event.EventTag.ON_TAG_DISCOVERED_NOT_CIE))
                 is TagLostException -> callback?.onEvent(Event(Event.EventTag.ON_TAG_LOST))
