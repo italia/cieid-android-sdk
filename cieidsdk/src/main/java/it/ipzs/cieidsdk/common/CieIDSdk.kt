@@ -104,7 +104,9 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     internal var ias: Ias? = null
     var enableLog: Boolean = false
     var pin: String = ""
-    private const val isoDepTimeout: Int = 4000
+    // the timeout of transceive(byte[]) in milliseconds (https://developer.android.com/reference/android/nfc/tech/IsoDep#setTimeout(int))
+    // a longer timeout may be useful when performing transactions that require a long processing time on the tag such as key generation.
+    private const val isoDepTimeout: Int = 10000
 
 
     @SuppressLint("CheckResult")
