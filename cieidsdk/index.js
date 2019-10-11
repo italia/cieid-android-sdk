@@ -128,6 +128,25 @@ class CieManager {
       });
     });
   };
+
+  /**
+   * It opens OS Settings on NFC section
+   *
+   */
+   openNFCSettings = () => {
+        if (Platform.OS === 'ios') {
+         return Promise.reject('not implemented');
+       }
+       return new Promise((resolve, reject) => {
+         NativeCie.openNFCSettings((err) => {
+           if (err) {
+             reject(err);
+           } else {
+             resolve();
+           }
+         })
+       })
+   }
 }
 
 export default new CieManager();

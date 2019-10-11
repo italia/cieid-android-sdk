@@ -257,7 +257,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     /**
     Open NFC Settings PAge
      */
-    fun enableNFC(activity: Activity) {
+    fun openNFCSettings(activity: Activity) {
         activity.startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
     }
 

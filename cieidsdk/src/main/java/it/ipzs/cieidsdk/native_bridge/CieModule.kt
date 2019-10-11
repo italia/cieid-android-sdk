@@ -1,12 +1,19 @@
 
 package it.ipzs.cieidsdk.native_bridge
 
+import android.app.Activity
+import android.content.Intent
+import android.provider.Settings
 import com.facebook.react.bridge.*
 import it.ipzs.cieidsdk.common.Callback
 import it.ipzs.cieidsdk.common.CieIDSdk
 import it.ipzs.cieidsdk.common.Event
 import com.facebook.react.modules.core.RCTNativeAppEventEmitter
 import com.facebook.react.bridge.Arguments.createMap
+import com.facebook.react.bridge.NativeModule
+import com.facebook.react.bridge.NativeModule.NativeMethod
+
+
 
 
 class CieModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), Callback {
@@ -113,4 +120,14 @@ class CieModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMod
         const val successChannel: String = "onSuccess"
     }
 
+    @ReactMethod
+    fun openNFCSettings(callback: com.facebook.react.bridge.Callback) {
+        val currentActivity = getCurrentActivity()
+        if (currentActivity == null) {
+            callback.invoke("fail to get current activity");
+        } else {
+            CieIDSdk.openNFCSettings(currentActivity);
+            callback.invoke();
+        }
+    }
 }
