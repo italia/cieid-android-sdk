@@ -1,17 +1,12 @@
 
 package it.ipzs.cieidsdk.native_bridge
 
-import android.app.Activity
-import android.content.Intent
-import android.provider.Settings
 import com.facebook.react.bridge.*
 import it.ipzs.cieidsdk.common.Callback
 import it.ipzs.cieidsdk.common.CieIDSdk
 import it.ipzs.cieidsdk.common.Event
 import com.facebook.react.modules.core.RCTNativeAppEventEmitter
 import com.facebook.react.bridge.Arguments.createMap
-import com.facebook.react.bridge.NativeModule
-import com.facebook.react.bridge.NativeModule.NativeMethod
 
 
 
@@ -85,8 +80,14 @@ class CieModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMod
     }
 
     @ReactMethod
-    fun setPin(pin: String) {
-        CieIDSdk.pin = pin
+    fun setPin(pin: String,callback: com.facebook.react.bridge.Callback) {
+        try{
+            CieIDSdk.pin = pin
+            callback.invoke()
+        }
+        catch(e: IllegalArgumentException){
+            callback.invoke(e.message)
+        }
     }
 
     @ReactMethod
