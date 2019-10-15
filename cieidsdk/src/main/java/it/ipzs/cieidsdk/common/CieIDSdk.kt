@@ -11,6 +11,7 @@ import android.nfc.NfcManager
 import android.nfc.Tag
 import android.nfc.TagLostException
 import android.nfc.tech.IsoDep
+import android.os.Build
 import android.provider.Settings
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableSingleObserver
@@ -269,6 +270,15 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
      */
     fun openNFCSettings(activity: Activity) {
         activity.startActivity(Intent(Settings.ACTION_NFC_SETTINGS))
+    }
+
+    /**
+    return true if the current OS supports the authentication. This method is due because with API level < 23 a security exception is raised
+    read more here - https://github.com/teamdigitale/io-cie-android-sdk/issues/10
+     */
+    fun hasApiLevelSupport() : Boolean {
+        // M is for Marshmallow! -> Api level 23
+        return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
     }
 
 

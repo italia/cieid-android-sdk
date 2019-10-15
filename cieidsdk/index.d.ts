@@ -19,6 +19,8 @@ declare module "react-native-cie" {
     attempts: number;
   };
   interface CieManager {
+    // check if the OS support CIE autentication
+    hasApiLevelSupport(): Promise<boolean>;
     // check if the device has NFC feature
     hasNFCFeature(): Promise<boolean>;
     // check if NFC is enabled

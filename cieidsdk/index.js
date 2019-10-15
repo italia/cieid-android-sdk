@@ -128,6 +128,22 @@ class CieManager {
   };
 
   /**
+    return a Promise will be resolved with true if the current OS supports the authentication. 
+    This method is due because with API level < 23 a security exception is raised
+    read more here - https://github.com/teamdigitale/io-cie-android-sdk/issues/10
+   */
+  hasApiLevelSupport = () => {
+    if (Platform.OS === "ios") {
+      return Promise.reject("not implemented");
+    }
+    return new Promise(resolve => {
+      NativeCie.hasApiLevelSupport(result => {
+        resolve(result);
+      });
+    });
+  };
+
+  /**
    * Check if the hardware module nfc is installed (only for Android devices)
    */
   hasNFCFeature = () => {
