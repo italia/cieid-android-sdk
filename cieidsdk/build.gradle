@@ -15,9 +15,9 @@ android {
 
         //ambienti
         //PRODUZIONE
-        buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it/idp/\""
+        //buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it/idp/\""
         //COLLAUDO
-        //buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it:8443/idp/\""
+        buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it:8443/idp/\""
 
     }
 

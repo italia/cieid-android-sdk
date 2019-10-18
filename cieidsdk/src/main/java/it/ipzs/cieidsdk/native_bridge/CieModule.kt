@@ -3,9 +3,11 @@ package it.ipzs.cieidsdk.native_bridge
 import com.facebook.react.bridge.*
 import it.ipzs.cieidsdk.common.Callback
 import it.ipzs.cieidsdk.common.CieIDSdk
-import it.ipzs.cieidsdk.common.Event
 import com.facebook.react.modules.core.RCTNativeAppEventEmitter
 import com.facebook.react.bridge.Arguments.createMap
+import com.facebook.react.bridge.NativeModule
+import com.facebook.react.bridge.NativeModule.NativeMethod
+import it.ipzs.cieidsdk.event.Event
 
 
 class CieModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext),
@@ -34,8 +36,8 @@ class CieModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMod
      * onEvent is called if an event occurs
      */
     override fun onEvent(event: Event) {
-        cieInvalidPinAttempts = event.attempts;
-        this.sendEvent(eventChannel, event.toString())
+        cieInvalidPinAttempts = event.attempts!!
+        this.sendEvent(eventChannel,event.toString())
     }
 
     override fun getName(): String {
@@ -119,7 +121,7 @@ class CieModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaMod
 
     @ReactMethod
     fun openNFCSettings(callback: com.facebook.react.bridge.Callback) {
-        val currentActivity = getCurrentActivity()
+        val currentActivity = currentActivity
         if (currentActivity == null) {
             callback.invoke("fail to get current activity");
         } else {

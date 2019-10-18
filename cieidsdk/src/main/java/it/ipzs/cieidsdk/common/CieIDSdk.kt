@@ -16,6 +16,7 @@ import android.provider.Settings
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
+import it.ipzs.cieidsdk.event.*
 import it.ipzs.cieidsdk.exceptions.BlockedPinException
 import it.ipzs.cieidsdk.exceptions.NoCieException
 import it.ipzs.cieidsdk.exceptions.PinInputNotValidException
@@ -33,58 +34,6 @@ import javax.net.ssl.SSLProtocolException
 
 val CERTIFICATE_EXPIRED: CharSequence = "SSLV3_ALERT_CERTIFICATE_EXPIRED"
 val CERTIFICATE_REVOKED: CharSequence = "SSLV3_ALERT_CERTIFICATE_REVOKED"
-
-
-interface EventValue {
-    val nameEvent: String
-}
-
-enum class EventTag : EventValue {
-    //tag
-    ON_TAG_DISCOVERED_NOT_CIE,
-    ON_TAG_DISCOVERED,
-    ON_TAG_LOST;
-
-    override val nameEvent: String = name
-}
-enum class EventCard: EventValue {
-    //card
-    ON_CARD_PIN_LOCKED,
-    ON_PIN_ERROR;
-
-    override val nameEvent: String = name
-
-}
-enum class EventCertificate : EventValue {
-    //certificate
-    CERTIFICATE_EXPIRED,
-    CERTIFICATE_REVOKED;
-
-    override val nameEvent: String = name
-}
-enum class EventError : EventValue {
-    //error
-    AUTHENTICATION_ERROR,
-    GENERAL_ERROR,
-    ON_NO_INTERNET_CONNECTION,
-    PIN_INPUT_ERROR;
-    override val nameEvent: String = name
-}
-
-class Event {
-
-    var attempts: Int;
-    private val eventValue: EventValue
-
-    constructor (event: EventValue, case: Int = 0) {
-        this.attempts = case
-        this.eventValue = event
-    }
-
-    override fun toString(): String {
-        return eventValue.nameEvent
-    }
-}
 
 
 interface Callback {
@@ -192,7 +141,6 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             isoDep.timeout = isoDepTimeout
             isoDep.connect()
             ias = Ias(isoDep)
-
             ias!!.getIdServizi()
             ias!!.startSecureChannel(ciePin)
             val certificate = ias!!.readCertCie()
