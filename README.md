@@ -59,4 +59,6 @@ Implementa inoltre le interfacce di Callback implementando i seguenti metodi:
        //caso di successo con url della pagina da caricare
     }
 ```
+# Licenza
+Il codice sorgente dell'sdk è rilasciato sotto licenza BSD (codice SPDX: BSD-3-Clause).
 
