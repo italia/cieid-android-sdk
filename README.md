@@ -1,6 +1,6 @@
 # CieID-android-sdk
 
-CieID-android-sdk è un SDK Android sviluppato in Kotlin che integra le funzionalità di autenticazione di "Entra con CIE". Integrando le funzionalità di questo kit, gli sviluppatori di app terze possono integrare l'autenticazione sui sistemi della pubblica amministrazione per la cartà d'identità elettronica (CIE 3.0) nelle app Android.
+CieID-android-sdk è un SDK Android sviluppato in Kotlin che include le funzionalità di autenticazione di "Entra con CIE". Utilizzando questo kit, gli sviluppatori di app terze possono integrare l'autenticazione sui sistemi della pubblica amministrazione per la cartà d'identità elettronica (CIE 3.0) nelle app Android.
 
 # Requisiti tecnici
 
@@ -24,40 +24,39 @@ Configurazione
 
 Nel build.gradle seleziona l'ambiente server dell'identity provider (iDP) di tuo interesse utilizzando i commenti
 ```gradle
-        //AMBIENTI:
+//AMBIENTI:
+//Ambiente di produzione
+//buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it/idp/\""
 
-        //Ambiente di produzione
-        //buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it/idp/\""
-	    
-        //Ambiente di collaudo
-        buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it:8443/idp/\""
+//Ambiente di collaudo
+buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it:8443/idp/\""
 ```
 Per integrare le funzionalità dell'SDK utilizza i seguenti metodi nell'activity di tuo interesse:
 ```kotlin
-		//Configurazione iniziale
-		CieIDSdk.start(activity, activity)
-		//Avvio utilizzo NFC
-		CieIDSdk.startNFCListening(activity)
-		//Abilitare o disabilitare i log, da disattivare in produzione
-		CieIDSdk.enableLog = true
-		//Bisogna settare la url caricata dalla pagina web dell' SP dalla webview su /OpenApp
-		CieIDSdk.setUrl(url.toString())
-		//inserire il pin della CIE
-		CieIDSdk.pin = input.text.toString()
-		//Avviare NFC
-		startNFC()
+//Configurazione iniziale
+CieIDSdk.start(activity, callback)
+//Avvio utilizzo NFC
+CieIDSdk.startNFCListening(activity)
+//Abilitare o disabilitare i log, da disattivare in produzione
+CieIDSdk.enableLog = true
+//Bisogna settare la url caricata dalla pagina web dell' SP dalla webview su /OpenApp
+CieIDSdk.setUrl(url.toString())
+//inserire il pin della CIE
+CieIDSdk.pin = input.text.toString()
+//Avviare NFC
+startNFC()
 ```
 Implementa inoltre le interfacce di Callback implementando i seguenti metodi:
 ```kotlin
-    override fun onEvent(event: Event) {
-	 	//evento 
-    }
-    override fun onError(e: Throwable) {
-		//caso di errore
-    }
-    override fun onSuccess(url: String) {
-       //caso di successo con url della pagina da caricare
-    }
+override fun onEvent(event: Event) {
+//evento 
+}
+override fun onError(e: Throwable) {
+//caso di errore
+}
+override fun onSuccess(url: String) {
+//caso di successo con url della pagina da caricare
+}
 ```
 # Licenza
 Il codice sorgente dell'sdk è rilasciato sotto licenza BSD (codice SPDX: BSD-3-Clause).
