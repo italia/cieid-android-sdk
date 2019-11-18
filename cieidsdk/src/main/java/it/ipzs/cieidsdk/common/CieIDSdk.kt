@@ -55,7 +55,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     // a longer timeout may be useful when performing transactions that require a long processing time on the tag such as key generation.
     private const val isoDepTimeout: Int = 10000
 
-    private val ciePinRegex = Regex("^[0-9]{8}\$")
+    private val ciePinRegex = Regex("^[0-9]{8}$")
     // pin property
     // 'set' checks if the given value has a valid pin cie format (string, 8 length, all chars are digits)
     var pin: String
@@ -126,7 +126,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     }
 
     private fun checkCodiceServer(codiceServer: String): Boolean {
-        val regex = Regex("^[0-9]+$")
+        val regex = Regex("^[0-9]{16}$")
         if(codiceServer.length==16 && regex.matches(codiceServer)){
             return true
         }
