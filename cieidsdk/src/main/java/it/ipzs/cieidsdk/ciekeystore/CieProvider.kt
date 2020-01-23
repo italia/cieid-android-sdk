@@ -1,6 +1,5 @@
 package it.ipzs.cieidsdk.ciekeystore
 
-import it.ipzs.cieidsdk.nfc.NFCCore.init
 import java.security.Provider
 
 
@@ -11,6 +10,6 @@ internal class CieProvider : Provider(CieProvider::class.java.simpleName, 1.0, "
     }
     init {
         put("KeyStore.$PROVIDER", CieKeyStore::class.java.name)
-        put("Signature.NONEwithRSA", CieSignatureImpl.None::class.java.name)
+        put("Cipher.RSA/ECB/PKCS1Padding", Cipher::class.java.name)
     }
 }

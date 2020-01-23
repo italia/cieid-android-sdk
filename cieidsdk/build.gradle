@@ -4,13 +4,13 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'maven'
 
 android {
-    compileSdkVersion 28
+    compileSdkVersion 29
 
     defaultConfig {
         minSdkVersion 19
-        targetSdkVersion 28
-        versionCode 1
-        versionName "1.0.0"
+        targetSdkVersion 29
+        versionCode 2
+        versionName "1.0.1"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
         //ambienti
@@ -20,8 +20,6 @@ android {
         buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it:8443/idp/\""
 
     }
-
-
 
     buildTypes {
         release {
