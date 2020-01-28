@@ -11,7 +11,6 @@ import it.ipzs.cieidsdk.nfc.algorithms.Sha256
 import it.ipzs.cieidsdk.nfc.extensions.hexStringToByteArray
 import it.ipzs.cieidsdk.util.CieIDSdkLogger
 import java.util.*
-import kotlin.experimental.and
 import kotlin.experimental.or
 
 
@@ -859,8 +858,7 @@ internal class Ias constructor(val isoDep: IsoDep) {
         val respAsn = sendApdu(GET_DATA, GET_DATA_Data, null)
         val asn1 = Asn1Tag.parse(respAsn.response, true)
         dh_ICCpubKey = asn1!!.child(0).data
-        val rsa2 = RSA(dh_p, dh_prKey)
-        val secret = rsa2.encrypt(dh_ICCpubKey)
+        val secret = rsa.encrypt(dh_ICCpubKey)
 
         val diffENC = byteArrayOf(0x00, 0x00, 0x00, 0x01)
         val diffMAC = byteArrayOf(0x00, 0x00, 0x00, 0x02)
