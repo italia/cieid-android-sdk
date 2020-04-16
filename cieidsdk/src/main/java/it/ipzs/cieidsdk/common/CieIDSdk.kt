@@ -217,7 +217,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
                 )
             }
         } catch (throwable: Throwable) {
-
+            callback?.onEvent(Event(EventError.CANT_STOP_NFC))
         }
 
     }
@@ -230,7 +230,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             nfcAdapter?.disableReaderMode(activity)
 
         } catch (throwable: Throwable) {
-
+            callback?.onEvent(Event(EventError.CANT_STOP_NFC))
         }
     }
 

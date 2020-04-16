@@ -27,7 +27,10 @@ interface  EventEnum
         AUTHENTICATION_ERROR,
         GENERAL_ERROR,
         PIN_INPUT_ERROR,
-        ON_NO_INTERNET_CONNECTION;
+        ON_NO_INTERNET_CONNECTION,
+        CANT_STOP_NFC,
+        CANT_START_NFC;
+
     }
 
 data class Event(var event : EventEnum,var attempts : Int? = null,var url : String? = null)
