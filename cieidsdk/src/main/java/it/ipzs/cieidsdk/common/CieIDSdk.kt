@@ -140,7 +140,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
 
     private fun checkCodiceServer(codiceServer: String): Boolean {
         val regex = Regex("^[0-9]{16}$")
-        if (regex.matches(codiceServer)) {
+        return regex.matches(codiceServer)
             return true
         }
         return false
