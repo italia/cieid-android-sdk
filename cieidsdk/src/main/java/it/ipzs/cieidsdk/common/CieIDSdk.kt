@@ -60,7 +60,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     // 'set' checks if the given value has a valid pin cie format (string, 8 length, all chars are digits)
     var pin: String
         get() = ciePin
-        set(value)  {
+        set(value) {
             require(ciePinRegex.matches(value)) { "the given cie PIN has no valid format" }
             ciePin = value
         }
@@ -81,18 +81,23 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             .subscribeWith(object :
                 DisposableSingleObserver<Response<ResponseBody>>() {
                 override fun onSuccess(idpResponse: Response<ResponseBody>) {
-                    CieIDSdkLogger.log("onSuccess")
-                    if (idpResponse.body() != null) {
-                        val codiceServer =
-                            idpResponse.body()!!.string().split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
-                        if(!checkCodiceServer(codiceServer)){
-                            callback?.onEvent(Event(EventError.GENERAL_ERROR))
-                        }
-                        val url =
-                            deepLinkInfo.nextUrl + "?" + deepLinkInfo.name + "=" + deepLinkInfo.value + "&login=1&codice=" + codiceServer
-                        callback?.onSuccess(url)
+                    if (idpResponse.isSuccessful) {
+                        CieIDSdkLogger.log("onSuccess")
+                        if (idpResponse.body() != null) {
+                            val codiceServer =
+                                idpResponse.body()!!.string().split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
+                            if (!checkCodiceServer(codiceServer)) {
+                                callback?.onEvent(Event(EventError.GENERAL_ERROR))
+                            }
+                            val url =
+                                deepLinkInfo.nextUrl + "?" + deepLinkInfo.name + "=" + deepLinkInfo.value + "&login=1&codice=" + codiceServer
+                            callback?.onSuccess(url)
 
+                        } else {
+                            callback?.onEvent(Event(EventError.AUTHENTICATION_ERROR))
+                        }
                     } else {
+                        CieIDSdkLogger.log("onError")
                         callback?.onEvent(Event(EventError.AUTHENTICATION_ERROR))
                     }
 
@@ -102,7 +107,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
                     CieIDSdkLogger.log("onError")
 
                     when (e) {
-                        is SocketTimeoutException , is UnknownHostException -> {
+                        is SocketTimeoutException, is UnknownHostException -> {
                             CieIDSdkLogger.log("SocketTimeoutException or UnknownHostException")
                             callback?.onEvent(Event(EventError.ON_NO_INTERNET_CONNECTION))
 
@@ -112,8 +117,16 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
                             CieIDSdkLogger.log("SSLProtocolException")
                             e.message?.let {
                                 when {
-                                    it.contains(CERTIFICATE_EXPIRED) -> callback?.onEvent(Event(EventCertificate.CERTIFICATE_EXPIRED))
-                                    it.contains(CERTIFICATE_REVOKED) -> callback?.onEvent(Event(EventCertificate.CERTIFICATE_REVOKED))
+                                    it.contains(CERTIFICATE_EXPIRED) -> callback?.onEvent(
+                                        Event(
+                                            EventCertificate.CERTIFICATE_EXPIRED
+                                        )
+                                    )
+                                    it.contains(CERTIFICATE_REVOKED) -> callback?.onEvent(
+                                        Event(
+                                            EventCertificate.CERTIFICATE_REVOKED
+                                        )
+                                    )
                                     else -> callback?.onError(e)
                                 }
                             }
@@ -127,7 +140,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
 
     private fun checkCodiceServer(codiceServer: String): Boolean {
         val regex = Regex("^[0-9]{16}$")
-        if(regex.matches(codiceServer)){
+        return regex.matches(codiceServer)
             return true
         }
         return false
@@ -149,7 +162,12 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
         } catch (throwable: Throwable) {
             CieIDSdkLogger.log(throwable.toString())
             when (throwable) {
-                is PinNotValidException -> callback?.onEvent(Event(EventCard.ON_PIN_ERROR, throwable.tentativi))
+                is PinNotValidException -> callback?.onEvent(
+                    Event(
+                        EventCard.ON_PIN_ERROR,
+                        throwable.tentativi
+                    )
+                )
                 is PinInputNotValidException -> callback?.onEvent(Event(EventError.PIN_INPUT_ERROR))
                 is BlockedPinException -> callback?.onEvent(Event(EventCard.ON_CARD_PIN_LOCKED))
                 is NoCieException -> callback?.onEvent(Event(EventTag.ON_TAG_DISCOVERED_NOT_CIE))
@@ -188,17 +206,32 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
      * Call on Resume of NFC Activity
      */
     fun startNFCListening(activity: Activity) {
-        nfcAdapter?.enableReaderMode(
-            activity, this, NfcAdapter.FLAG_READER_NFC_A or
-                    NfcAdapter.FLAG_READER_NFC_B or NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK, null
-        )
+        try {
+            if (!activity.isFinishing) {
+                nfcAdapter?.enableReaderMode(
+                    activity,
+                    this,
+                    NfcAdapter.FLAG_READER_NFC_A or
+                            NfcAdapter.FLAG_READER_NFC_B or NfcAdapter.FLAG_READER_SKIP_NDEF_CHECK,
+                    null
+                )
+            }
+        } catch (throwable: Throwable) {
+
+        }
+
     }
 
     /**
      * Call on Pause Of NFC Activity
      */
     fun stopNFCListening(activity: Activity) {
-        nfcAdapter?.disableReaderMode(activity)
+        try {
+            nfcAdapter?.disableReaderMode(activity)
+
+        } catch (throwable: Throwable) {
+
+        }
     }
 
     /**
@@ -227,7 +260,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     return true if the current OS supports the authentication. This method is due because with API level < 23 a security exception is raised
     read more here - https://github.com/teamdigitale/io-cie-android-sdk/issues/10
      */
-    fun hasApiLevelSupport() : Boolean {
+    fun hasApiLevelSupport(): Boolean {
         // M is for Marshmallow! -> Api level 23
         return Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
     }

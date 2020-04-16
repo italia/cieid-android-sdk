@@ -15,9 +15,9 @@ android {
 
         //ambienti
         //PRODUZIONE
-        buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it/idp/\""
+        //buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it/idp/\""
         //COLLAUDO
-        //buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it:8443/idp/\""
+        buildConfigField "String", "BASE_URL_IDP", "\"https://preproduzione.idserver.servizicie.interno.gov.it/idp/\""
 
     }
 
@@ -48,10 +48,10 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-scalars:$retrofit_version"
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
-    implementation 'com.squareup.okio:okio:2.4.1'
+    implementation 'com.squareup.okio:okio:2.4.3'
 
     //rxjava
-    implementation 'io.reactivex.rxjava2:rxjava:2.2.13'
+    implementation 'io.reactivex.rxjava2:rxjava:2.2.18'
     implementation 'io.reactivex.rxjava2:rxandroid:2.1.1'
 
     implementation 'io.kotlintest:kotlintest:2.0.7'
