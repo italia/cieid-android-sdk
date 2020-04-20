@@ -29,7 +29,7 @@ Nel build.gradle seleziona l'ambiente server dell'identity provider (iDP) di tuo
 //buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it/idp/\""
 
 //Ambiente di collaudo
-buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it:8443/idp/\""
+buildConfigField "String", "BASE_URL_IDP", "\"https://preproduzione.idserver.servizicie.interno.gov.it/idp/\""
 ```
 Per integrare le funzionalità dell'SDK utilizza i seguenti metodi nell'activity di tuo interesse:
 ```kotlin
