@@ -141,9 +141,6 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     private fun checkCodiceServer(codiceServer: String): Boolean {
         val regex = Regex("^[0-9]{16}$")
         return regex.matches(codiceServer)
-            return true
-        }
-        return false
     }
 
 
@@ -217,7 +214,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
                 )
             }
         } catch (throwable: Throwable) {
-
+            callback?.onEvent(Event(EventError.CANT_STOP_NFC))
         }
 
     }
@@ -230,7 +227,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             nfcAdapter?.disableReaderMode(activity)
 
         } catch (throwable: Throwable) {
-
+            callback?.onEvent(Event(EventError.CANT_STOP_NFC))
         }
     }
 
