@@ -588,6 +588,10 @@ internal class Ias constructor(val isoDep: IsoDep) {
         }
     }
 
+    init {
+        selectAidIas()
+        selectAidCie()
+    }
 
     /**
      * inizializza un canale sicuro tra carta e dispositivo passando il pin dell'utente
@@ -596,8 +600,6 @@ internal class Ias constructor(val isoDep: IsoDep) {
      */
     @Throws(Exception::class)
     fun startSecureChannel(pin: String) {
-        selectAidIas()
-        selectAidCie()
         initDHParam()
         if (dappPubKey.isEmpty())
             readDappPubKey()
@@ -617,8 +619,6 @@ internal class Ias constructor(val isoDep: IsoDep) {
     @Throws(Exception::class)
     fun getIdServizi(): String {
         CieIDSdkLogger.log("getIdServizi()")
-        selectAidIas()
-        selectAidCie()
         transmit("00a40204021001".hexStringToByteArray())
         val res = transmit("00b000000c".hexStringToByteArray())
         if (res.swHex != "9000") {
