@@ -617,8 +617,8 @@ internal class Ias constructor(val isoDep: IsoDep) {
     @Throws(Exception::class)
     fun getIdServizi(): String {
         CieIDSdkLogger.log("getIdServizi()")
-        transmit("00A4040C0DA0000000308000000009816001".hexStringToByteArray())
-        transmit("00A4040406A00000000039".hexStringToByteArray())
+        selectAidIas()
+        selectAidCie()
         transmit("00a40204021001".hexStringToByteArray())
         val res = transmit("00b000000c".hexStringToByteArray())
         if (res.swHex != "9000") {
