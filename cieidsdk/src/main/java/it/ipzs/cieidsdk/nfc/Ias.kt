@@ -10,6 +10,7 @@ import it.ipzs.cieidsdk.nfc.algorithms.RSA
 import it.ipzs.cieidsdk.nfc.algorithms.Sha256
 import it.ipzs.cieidsdk.nfc.extensions.hexStringToByteArray
 import it.ipzs.cieidsdk.util.CieIDSdkLogger
+import it.ipzs.cieidsdk.nfc.ApduResponse.SwError.*
 import java.util.*
 import kotlin.experimental.or
 
@@ -1290,14 +1291,14 @@ internal class Ias constructor(val isoDep: IsoDep) {
                 val respApdu = sendApduSM(readFile, byteArrayOf(), byteArrayOf(le))
                 chn = respApdu.response
             }
-            if (response.swHex == "9000") {
+            if (response.swShort == SW_NO_ERROR.code) {
                 content = AppUtil.appendByteArray(content, chn)
                 cnt += chn.size
                 chunk = 256
             } else {
-                if (response.swHex == "6282") {
+                if (response.swShort == SW_END_OF_FILE.code) {
                     content = AppUtil.appendByteArray(content, chn)
-                } else if (response.swHex != "6b00") {
+                } else if (response.swShort == SW_WRONG_P1P2.code) {
                     return content
                 }
                 break
@@ -1329,14 +1330,14 @@ internal class Ias constructor(val isoDep: IsoDep) {
                 val respApdu = sendApdu(readFile, byteArrayOf(), byteArrayOf(le))
                 chn = respApdu.response
             }
-            if (response.swHex == "9000") {
+            if (response.swShort == SW_NO_ERROR.code) {
                 content = AppUtil.appendByteArray(content, chn)
                 cnt += chn.size
                 chunk = 256
             } else {
-                if (response.swHex == "6282") {
+                if (response.swShort == SW_END_OF_FILE.code) {
                     content = AppUtil.appendByteArray(content, chn)
-                } else if (response.swHex != "6b00") {
+                } else if (response.swShort == SW_WRONG_P1P2.code) {
                     return content
                 }
                 break
