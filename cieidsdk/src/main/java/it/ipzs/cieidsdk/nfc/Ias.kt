@@ -1334,9 +1334,9 @@ internal class Ias constructor(val isoDep: IsoDep) {
                 cnt += chn.size
                 chunk = 256
             } else {
-                if (response.swHex == "0x6282") {
+                if (response.swHex == "6282") {
                     content = AppUtil.appendByteArray(content, chn)
-                } else if (response.swHex != "0x6b00") {
+                } else if (response.swHex != "6b00") {
                     return content
                 }
                 break
