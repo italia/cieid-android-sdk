@@ -12,7 +12,7 @@ CieID-android-sdk necessita che il fornitore del servizio digitale sia un Servic
 
 # Come si usa
 
-## Flusso AppToApp
+## Flusso con reindirizzamento
 Permette di completare il flusso di autenticazione mediante l'applicazione "CieID" presente sul Play Store Android.
 
 ## Flusso interno
@@ -57,7 +57,7 @@ Per integrare le funzionalità dell'SDK utilizza i seguenti metodi nell'activity
     }
 ```
 
-## Flusso integrato
+## Flusso interno
 Nel build.gradle seleziona l'ambiente server dell'identity provider (iDP) di tuo interesse utilizzando i commenti
 ```gradle
 //AMBIENTI:
