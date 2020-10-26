@@ -13,6 +13,7 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.AppCompat"
             tools:ignore="GoogleAppIndexingWarning">
+
         <activity android:name=".MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -20,6 +21,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name=".internal.InternalActivity" android:label="@string/internal"/>
+        <activity android:name=".redirection.RedirectionActivity" android:label="@string/redirection"/>
+
     </application>
 
 </manifest>

@@ -1,24 +1,36 @@
 <?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:background="@android:color/white"
+    android:layout_height="match_parent">
+
 <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:orientation="vertical">
+
+    <Button
+        android:id="@+id/button_internal"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@android:color/white"
-        android:orientation="horizontal">
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:text="@string/internal"
+        android:textColor="@android:color/black"
+        android:textSize="20sp" />
 
-    <WebView
-            android:id="@+id/webView"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"/>
-
-    <TextView
-            android:layout_gravity="center"
-            android:gravity="center"
-            android:id="@+id/text"
-            android:text="@string/waiting"
-            android:textSize="20sp"
-            android:textColor="@android:color/black"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+    <Button
+        android:id="@+id/button_redirection"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:gravity="center"
+        android:layout_marginTop="50dp"
+        android:text="@string/redirection"
+        android:textColor="@android:color/black"
+        android:textSize="20sp" />
 
 </LinearLayout>
+
+</RelativeLayout>
