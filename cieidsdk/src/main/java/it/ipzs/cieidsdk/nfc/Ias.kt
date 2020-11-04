@@ -659,8 +659,8 @@ internal class Ias constructor(val isoDep: IsoDep) {
         val nt = AppUtil.bytesToHex(response.swByte)
         return when {
             nt.equals("9000", ignoreCase = true) -> 3
-            nt.equals("ffc2", ignoreCase = true) -> 2
-            nt.equals("ffc1", ignoreCase = true) -> 1
+            nt.equals("63c2", ignoreCase = true) -> 2
+            nt.equals("63c1", ignoreCase = true) -> 1
             else -> 0
         }
     }
