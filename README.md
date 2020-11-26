@@ -12,6 +12,8 @@ CieID-android-sdk necessita che il fornitore del servizio digitale sia un Servic
 
 # Come si usa
 
+Nel kit è presente un'applicazione di esempio, con un activity per ogni flusso, che mostra come integrare i 2 flussi facilmente. La gestione degli errori è demandata all'applicazione integrante.
+
 ## Flusso con reindirizzamento
 Permette di completare il flusso di autenticazione mediante l'applicazione "CieID" presente sul Play Store Android.
 
@@ -21,12 +23,27 @@ Permette di completare il flusso di autenticazione internamente all'applicazione
 ```gradle
 implementation project(path: ':cieidsdk')
 ```
-Nel kit è presente un'applicazione di esempio che mostra come integrare i 2 flussi facilmente. In entrambi i flussi la gestione degli errori è demandata all'applicazione integrante.
 
 # Configurazione
+E' possibile utilizzare la soluzione su due ambienti: uno di **preproduzione**, per gli sviluppi applicativi, e l'altro di **produzione**, per l'esercizio.
 
+Entrambi i flussi vengono avviati tramite l'utilizzo di una Webview, é per questo necessario caricare la URL della pagina web del Service Provider che integra il pulsante "Entra con CIE" come mostrato nell'esempio:
+
+```kotlin
+    //inserire url service provider
+    webView.loadUrl("URL del Service Provider")
+```
+    
 ## Flusso con reindirizzamento
-Per integrare le funzionalità dell'SDK utilizza i seguenti metodi nell'activity di tuo interesse:
+E' necessario selezionare l'applicazione "CieID" a cui indirizzare le richieste di autenticazione. Ció puó essere fatto modificando i commenti dalle righe di interesse, come mostrato di seguito.
+
+```kotlin
+    val appPackageName = "it.ipzs.cieid"
+    //COLLAUDO
+    //val appPackageName = "it.ipzs.cieid.collaudo"
+```
+
+Per integrare le funzionalità dell'SDK é necessario intercettare la URL contenente il valore "/OpenApp" ed avviare l'App CieID integrando il codice seguente: 
 ```kotlin
       val intent = Intent()
                     try {
@@ -46,19 +63,20 @@ Per integrare le funzionalità dell'SDK utilizza i seguenti metodi nell'activity
                         )
                     }
                     return true
+```
+Una volta avviata correttamente l'App CieID, avviene l'autenticazione tramite la CIE, e al termine viene restituita una nuova URL da ricaricare nella WebView precedente, come mostrato nell'esempio seguente:
 
+```kotlin
    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         val url = data?.getStringExtra(URL)
         webView.loadUrl(url)
-
-
     }
 ```
 
 ## Flusso interno
-Nel build.gradle seleziona l'ambiente server dell'identity provider (iDP) di tuo interesse utilizzando i commenti
+Nel build.gradle seleziona l'ambiente di tuo interesse utilizzando i commenti
 ```gradle
 //AMBIENTI:
 //Ambiente di produzione
