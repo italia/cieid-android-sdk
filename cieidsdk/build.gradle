@@ -33,7 +33,7 @@ android {
 
 
 ext {
-    okhttp_version = '4.9.0'
+    okhttp_version = '4.9.1'
     retrofit_version = '2.9.0'
     kotlin_version = '1.4.10'
 }
@@ -48,7 +48,7 @@ dependencies {
     implementation "com.squareup.retrofit2:converter-scalars:$retrofit_version"
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
-    implementation 'com.squareup.okio:okio:2.8.0'
+    implementation 'com.squareup.okio:okio:2.10.0'
 
     //rxjava
     implementation 'io.reactivex.rxjava2:rxjava:2.2.19'
