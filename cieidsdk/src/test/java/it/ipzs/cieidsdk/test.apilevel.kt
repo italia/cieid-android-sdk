@@ -1,11 +1,10 @@
-package tests
+package it.ipzs.cieidsdk
 
 import io.kotlintest.specs.FreeSpec
-import io.kotlintest.specs.StringSpec
 import java.lang.reflect.Field
 import java.lang.reflect.Modifier
 import android.os.Build
-import io.kotlintest.matchers.shouldBe
+import io.kotlintest.shouldBe
 import it.ipzs.cieidsdk.common.CieIDSdk
 
 

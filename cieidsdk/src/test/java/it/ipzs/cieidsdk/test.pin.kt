@@ -1,6 +1,6 @@
-package tests
+package it.ipzs.cieidsdk
 
-import io.kotlintest.matchers.*
+import io.kotlintest.*
 import io.kotlintest.specs.StringSpec
 import it.ipzs.cieidsdk.common.CieIDSdk
 
@@ -29,7 +29,7 @@ class Pin : StringSpec({
     // with a char
     val wrongPin2 = "123a5678"
     fun setWrongPin2(){CieIDSdk.pin = wrongPin2}
-    "should throw an illegal argument exception"{
+    "should throw an illegal argument exception 2"{
         shouldThrow<IllegalArgumentException> {
             setWrongPin2()
         }
