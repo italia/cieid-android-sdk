@@ -8,8 +8,11 @@ interface  EventEnum
         ON_TAG_DISCOVERED_NOT_CIE,
         ON_TAG_DISCOVERED,
         ON_TAG_LOST;
-
     }
+    enum class EventSmartphone : EventEnum {
+        EXTENDED_APDU_NOT_SUPPORTED
+    }
+
     enum class EventCard: EventEnum {
         //card
         ON_CARD_PIN_LOCKED,
