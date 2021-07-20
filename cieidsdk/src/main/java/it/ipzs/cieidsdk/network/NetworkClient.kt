@@ -36,13 +36,8 @@ internal class NetworkClient(private val certificate : ByteArray) {
         val cieProvider = CieProvider()
         Security.insertProviderAt(cieProvider, 1)
 
-        val certificatePinner = CertificatePinner.Builder()
-            .add(Endpoints.BASE_URL_CERTIFICATE, Endpoints.PIN_ROOT)
-            .build()
-
         val builder = OkHttpClient.Builder()
             .addInterceptor(loggingInterceptor)
-            .certificatePinner(certificatePinner)
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
             .writeTimeout(15, TimeUnit.SECONDS)
