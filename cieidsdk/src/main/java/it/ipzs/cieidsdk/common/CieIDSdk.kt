@@ -150,6 +150,15 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             val isoDep = IsoDep.get(tag)
             isoDep.timeout = isoDepTimeout
             isoDep.connect()
+
+            if(isoDep.isExtendedLengthApduSupported){
+                CieIDSdkLogger.log("isExtendedLengthApduSupported : true")
+            }else{
+                CieIDSdkLogger.log("isExtendedLengthApduSupported : false")
+                callback?.onEvent(Event(EventSmartphone.EXTENDED_APDU_NOT_SUPPORTED))
+                return
+            }
+
             ias = Ias(isoDep)
             ias!!.getIdServizi()
             ias!!.startSecureChannel(ciePin)
