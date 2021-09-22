@@ -15,6 +15,7 @@ import android.os.Build
 import android.provider.Settings
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableSingleObserver
+import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import it.ipzs.cieidsdk.event.*
 import it.ipzs.cieidsdk.exceptions.BlockedPinException
