@@ -31,8 +31,8 @@ interface  EventEnum
         GENERAL_ERROR,
         PIN_INPUT_ERROR,
         ON_NO_INTERNET_CONNECTION,
-        CANT_STOP_NFC,
-        CANT_START_NFC;
+        STOP_NFC_ERROR,
+        START_NFC_ERROR;
 
     }
 
