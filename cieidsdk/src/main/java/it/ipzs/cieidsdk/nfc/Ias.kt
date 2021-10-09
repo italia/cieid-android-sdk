@@ -10,6 +10,7 @@ import it.ipzs.cieidsdk.nfc.algorithms.RSA
 import it.ipzs.cieidsdk.nfc.algorithms.Sha256
 import it.ipzs.cieidsdk.nfc.extensions.hexStringToByteArray
 import it.ipzs.cieidsdk.util.CieIDSdkLogger
+import it.ipzs.cieidsdk.nfc.ApduResponse.SwError.*
 import java.util.*
 import kotlin.experimental.or
 
@@ -588,6 +589,10 @@ internal class Ias constructor(val isoDep: IsoDep) {
         }
     }
 
+    init {
+        selectAidIas()
+        selectAidCie()
+    }
 
     /**
      * inizializza un canale sicuro tra carta e dispositivo passando il pin dell'utente
@@ -596,8 +601,6 @@ internal class Ias constructor(val isoDep: IsoDep) {
      */
     @Throws(Exception::class)
     fun startSecureChannel(pin: String) {
-        selectAidIas()
-        selectAidCie()
         initDHParam()
         if (dappPubKey.isEmpty())
             readDappPubKey()
@@ -617,8 +620,6 @@ internal class Ias constructor(val isoDep: IsoDep) {
     @Throws(Exception::class)
     fun getIdServizi(): String {
         CieIDSdkLogger.log("getIdServizi()")
-        transmit("00A4040C0DA0000000308000000009816001".hexStringToByteArray())
-        transmit("00A4040406A00000000039".hexStringToByteArray())
         transmit("00a40204021001".hexStringToByteArray())
         val res = transmit("00b000000c".hexStringToByteArray())
         if (res.swHex != "9000") {
@@ -658,8 +659,8 @@ internal class Ias constructor(val isoDep: IsoDep) {
         val nt = AppUtil.bytesToHex(response.swByte)
         return when {
             nt.equals("9000", ignoreCase = true) -> 3
-            nt.equals("ffc2", ignoreCase = true) -> 2
-            nt.equals("ffc1", ignoreCase = true) -> 1
+            nt.equals("63c2", ignoreCase = true) -> 2
+            nt.equals("63c1", ignoreCase = true) -> 1
             else -> 0
         }
     }
@@ -1290,14 +1291,14 @@ internal class Ias constructor(val isoDep: IsoDep) {
                 val respApdu = sendApduSM(readFile, byteArrayOf(), byteArrayOf(le))
                 chn = respApdu.response
             }
-            if (response.swHex == "9000") {
+            if (response.swShort == SW_NO_ERROR.code) {
                 content = AppUtil.appendByteArray(content, chn)
                 cnt += chn.size
                 chunk = 256
             } else {
-                if (response.swHex == "6282") {
+                if (response.swShort == SW_END_OF_FILE.code) {
                     content = AppUtil.appendByteArray(content, chn)
-                } else if (response.swHex != "6b00") {
+                } else if (response.swShort == SW_WRONG_P1P2.code) {
                     return content
                 }
                 break
@@ -1329,14 +1330,14 @@ internal class Ias constructor(val isoDep: IsoDep) {
                 val respApdu = sendApdu(readFile, byteArrayOf(), byteArrayOf(le))
                 chn = respApdu.response
             }
-            if (response.swHex == "9000") {
+            if (response.swShort == SW_NO_ERROR.code) {
                 content = AppUtil.appendByteArray(content, chn)
                 cnt += chn.size
                 chunk = 256
             } else {
-                if (response.swHex == "0x6282") {
+                if (response.swShort == SW_END_OF_FILE.code) {
                     content = AppUtil.appendByteArray(content, chn)
-                } else if (response.swHex != "0x6b00") {
+                } else if (response.swShort == SW_WRONG_P1P2.code) {
                     return content
                 }
                 break
