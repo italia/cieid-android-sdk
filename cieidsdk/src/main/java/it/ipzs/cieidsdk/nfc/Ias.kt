@@ -12,6 +12,7 @@ import it.ipzs.cieidsdk.nfc.extensions.hexStringToByteArray
 import it.ipzs.cieidsdk.util.CieIDSdkLogger
 import it.ipzs.cieidsdk.nfc.ApduResponse.SwError.*
 import java.util.*
+import java.util.concurrent.locks.ReentrantLock
 import kotlin.experimental.or
 
 
@@ -26,6 +27,7 @@ internal class Ias constructor(val isoDep: IsoDep) {
     internal class SendApduException(message : String) : IllegalArgumentException(message)
 
 
+    private var rlSign: ReentrantLock = ReentrantLock()
     private var index = 0
     private val CIE_AID = byteArrayOf(0xA0.toByte(), 0x00, 0x00, 0x00, 0x00, 0x39)
     private var dh_g: ByteArray = byteArrayOf()
@@ -631,6 +633,7 @@ internal class Ias constructor(val isoDep: IsoDep) {
 
     @Throws(Exception::class)
     fun sign(dataToSign: ByteArray): ByteArray? {
+        rlSign.lock()
         CieIDSdkLogger.log("sign()")
         val setKey = byteArrayOf(0x00, 0x22, 0x41, 0xA4.toByte())
         val val02 = byteArrayOf(0x02)
@@ -1681,7 +1684,17 @@ internal class Ias constructor(val isoDep: IsoDep) {
         return resp
     }
 
-
-
-
+    fun startKeepAlive() {
+        val id = 0x1003
+        Thread(Runnable {
+            while(rlSign.tryLock()) {
+                try {
+                    sendApduSM(byteArrayOf(0x00, 0xa4.toByte(), 0x02, 0x04), byteArrayOf(HIBYTE(id), LOBYTE(id)), null)
+                } finally {
+                    rlSign.unlock()
+                }
+                Thread.sleep(10)
+            }
+        }).start()
+    }
 }

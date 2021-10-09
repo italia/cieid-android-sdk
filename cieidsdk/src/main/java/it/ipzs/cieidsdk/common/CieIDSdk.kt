@@ -170,6 +170,7 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             ias!!.getIdServizi()
             ias!!.startSecureChannel(ciePin)
             val certificate = ias!!.readCertCie()
+            ias!!.startKeepAlive()
             call(certificate)
 
         } catch (throwable: Throwable) {
