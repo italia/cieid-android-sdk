@@ -15,6 +15,7 @@ import android.os.Build
 import android.provider.Settings
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableSingleObserver
+import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import it.ipzs.cieidsdk.event.*
 import it.ipzs.cieidsdk.exceptions.BlockedPinException
@@ -75,6 +76,12 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             put(IdpService.authnRequest, deepLinkInfo.authnRequest ?: "")
             put(IdpService.generaCodice, "1")
         }
+        
+        // handling all swallowed exception
+        RxJavaPlugins.setErrorHandler { error -> run {
+        CieIDSdkLogger.log("error handled by RxJavaPlugins $error")
+        callback?.onError(error)
+        }}
 
         idpService.callIdp(mapValues).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
