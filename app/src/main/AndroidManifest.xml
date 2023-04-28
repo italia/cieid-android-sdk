@@ -3,7 +3,7 @@
           xmlns:tools="http://schemas.android.com/tools"
           package="it.ipzs.cieidsdk.sampleapp">
 
-
+    <uses-permission android:name="android.permission.INTERNET" />
     <meta-data android:name="android.webkit.WebView.EnableSafeBrowsing"
                android:value="true" />
 
@@ -11,6 +11,7 @@
             android:allowBackup="true"
             android:label="@string/app_name"
             android:supportsRtl="true"
+            android:usesCleartextTraffic="false"
             android:theme="@style/Theme.AppCompat"
             tools:ignore="GoogleAppIndexingWarning">
 

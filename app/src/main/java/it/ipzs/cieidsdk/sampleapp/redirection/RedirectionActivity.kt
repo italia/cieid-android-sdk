@@ -3,6 +3,7 @@ package it.ipzs.cieidsdk.sampleapp.redirection
 import android.annotation.SuppressLint
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Bundle
 import android.text.TextUtils
@@ -20,8 +21,6 @@ class RedirectionActivity : AppCompatActivity() {
     val className = "it.ipzs.cieid.BaseActivity"
     val URL = "URL"
     val ERROR = "ERROR"
-    //COLLAUDO
-    //val appPackageName = "it.ipzs.cieid.collaudo"
 
     //javascript necessario
     @SuppressLint("SetJavaScriptEnabled")
@@ -44,10 +43,20 @@ class RedirectionActivity : AppCompatActivity() {
 
 
         webView.webViewClient = object : WebViewClient() {
+            override fun onPageFinished(view: WebView?, url: String?) {
+                super.onPageFinished(view, url)
+            }
+
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                super.onPageStarted(view, url, favicon)
+            }
+
             override fun shouldOverrideUrlLoading(view: WebView?, url: String?): Boolean {
                 // The webView is about to navigate to the specified host.
-                if (url.toString().contains("OpenApp")) {
-
+                if (
+                    url.toString().contains("OpenApp") ||
+                    url.toString().contains("login/livello2") ||
+                    url.toString().contains("login/livello1")) {
                     val intent = Intent()
                     try {
                         intent.setClassName(appPackageName, className)
@@ -81,7 +90,7 @@ class RedirectionActivity : AppCompatActivity() {
             RESULT_OK -> {
                 val url = data?.getStringExtra(URL)
                 if (!TextUtils.isEmpty(url)) {
-                    webView.loadUrl(url)
+                    webView.loadUrl(url!!)
                 } else {
                     when (data?.getIntExtra(ERROR, 0)) {
                         RedirectionError.GENERIC_ERROR.code -> Toast.makeText(this, "GENERIC ERROR", Toast.LENGTH_LONG).show()

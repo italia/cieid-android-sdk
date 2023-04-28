@@ -40,7 +40,7 @@ E' necessario selezionare l'applicazione "CieID" a cui indirizzare le richieste 
 ```kotlin
     val appPackageName = "it.ipzs.cieid"
     //COLLAUDO
-    //val appPackageName = "it.ipzs.cieid.collaudo"
+    //val appPackageName = "it.ipzs.cieid.coll"
 ```
 
 Per integrare le funzionalità dell'SDK é necessario intercettare la URL contenente il valore "/OpenApp" ed avviare l'App CieID integrando il codice seguente: 

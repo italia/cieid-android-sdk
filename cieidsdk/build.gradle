@@ -15,9 +15,14 @@ android {
 
         //ambienti
         //PRODUZIONE
-        buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it/idp/\""
-        //COLLAUDO
+        //buildConfigField "String", "BASE_URL_IDP", "\"https://idserver.servizicie.interno.gov.it/idp/\""
+        //PREPRODUZIONE
         //buildConfigField "String", "BASE_URL_IDP", "\"https://preproduzione.idserver.servizicie.interno.gov.it/idp/\""
+        //COLLAUDO
+        buildConfigField "String", "BASE_URL_IDP", "\"https://collaudo.idserver.servizicie.interno.gov.it/idp/\""
+        buildConfigField "String", "BASE_URL_CERTIFICATE", "\"collaudo.idserver.servizicie.interno.gov.it\""
+        buildConfigField "String", "PIN_ROOT", "\"sha256/cGuxAXyFXFkWm61cF4HPWX8S0srS9j0aSqN0k4AP+4A=\""
+        buildConfigField "String", "PIN_LEAF", "\"sha256/aQmQCV6ngX49Y/T5Imt8jykuzmOrWGnw82wtvD9yo1g=\""
     }
 
     buildTypes {
@@ -48,6 +53,9 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:$retrofit_version"
     implementation "com.squareup.retrofit2:adapter-rxjava2:$retrofit_version"
     implementation 'com.squareup.okio:okio:2.9.0'
+    implementation "com.squareup.retrofit2:converter-moshi:2.9.0"
+    //tsl
+    implementation 'com.google.android.gms:play-services-auth:19.2.0'
 
     //rxjava
     implementation 'io.reactivex.rxjava2:rxjava:2.2.21'
