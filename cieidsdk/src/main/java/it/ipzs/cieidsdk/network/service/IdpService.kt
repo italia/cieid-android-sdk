@@ -11,9 +11,8 @@ import retrofit2.http.POST
 
 internal interface IdpService {
 
-    @Headers("User-Agent: Mozilla/5.0")
     @FormUrlEncoded
-    @POST(Endpoints.idp)
+    @POST(Endpoints.login)
     fun callIdp(@FieldMap(encoded = true) values: Map<String, String>): Single<Response<ResponseBody>>
 
     companion object {
