@@ -3,20 +3,20 @@ apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 
 android {
-    compileSdkVersion 29
+    compileSdkVersion 30
     defaultConfig {
         applicationId "it.ipzs.cieidsdk.sampleapp"
         multiDexEnabled true
-        minSdkVersion  19
-        targetSdkVersion 29
+        minSdkVersion  23
+        targetSdkVersion 30
         versionCode 1
         versionName "0.0.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
     }
 
     compileOptions {
-        targetCompatibility = "8"
-        sourceCompatibility = "8"
+        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_11
     }
 
     buildTypes {

@@ -22,9 +22,9 @@ class InternalActivity : AppCompatActivity(), Callback {
     override fun onEvent(event: Event) {
         Log.d("onEvent",event.toString())
         runOnUiThread {
-            if(event.attempts==0){
+            if (event.attempts == 0) {
                 text.text = "EVENT : $event"
-            }else {
+            } else {
                 text.text = "EVENT : $event\nTentativi : ${event.attempts}"
             }
         }

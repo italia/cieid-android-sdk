@@ -13,9 +13,12 @@ import android.nfc.TagLostException
 import android.nfc.tech.IsoDep
 import android.os.Build
 import android.provider.Settings
+import android.util.Log
+import com.google.android.gms.security.ProviderInstaller
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableSingleObserver
 import io.reactivex.schedulers.Schedulers
+import it.ipzs.cieidsdk.BuildConfig
 import it.ipzs.cieidsdk.event.*
 import it.ipzs.cieidsdk.exceptions.BlockedPinException
 import it.ipzs.cieidsdk.exceptions.NoCieException
@@ -23,11 +26,16 @@ import it.ipzs.cieidsdk.exceptions.PinInputNotValidException
 import it.ipzs.cieidsdk.exceptions.PinNotValidException
 import it.ipzs.cieidsdk.network.NetworkClient
 import it.ipzs.cieidsdk.network.service.IdpService
+import it.ipzs.cieidsdk.nfc.AppUtil
 import it.ipzs.cieidsdk.nfc.Ias
+import it.ipzs.cieidsdk.nfc.algorithms.Sha256
+import it.ipzs.cieidsdk.nfc.extensions.toHex
 import it.ipzs.cieidsdk.url.DeepLinkInfo
 import it.ipzs.cieidsdk.util.CieIDSdkLogger
+import okhttp3.CertificatePinner
 import okhttp3.ResponseBody
 import retrofit2.Response
+import java.lang.Exception
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
 import javax.net.ssl.SSLProtocolException
@@ -54,6 +62,9 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
     // the timeout of transceive(byte[]) in milliseconds (https://developer.android.com/reference/android/nfc/tech/IsoDep#setTimeout(int))
     // a longer timeout may be useful when performing transactions that require a long processing time on the tag such as key generation.
     private const val isoDepTimeout: Int = 10000
+    private lateinit var certificatePinner:CertificatePinner
+    private var loginAuthenticationResponse : String? = null
+    var idServizi: String = ""
 
     private val ciePinRegex = Regex("^[0-9]{8}$")
     // pin property
@@ -65,15 +76,25 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             ciePin = value
         }
 
+    fun createCertificatePinning(){
+        certificatePinner = CertificatePinner.Builder()
+            .add(BuildConfig.BASE_URL_CERTIFICATE,BuildConfig.PIN_ROOT)
+            .add(BuildConfig.BASE_URL_CERTIFICATE,BuildConfig.PIN_LEAF)
+            .build()
+    }
 
     @SuppressLint("CheckResult")
     fun call(certificate: ByteArray) {
 
-        val idpService: IdpService = NetworkClient(certificate).idpService
+        createCertificatePinning()
+
+        val networkClient = NetworkClient(certificate)
+        networkClient.certificatePinner = certificatePinner
+        val idpService: IdpService = networkClient.idpService
+
         val mapValues = hashMapOf<String, String>().apply {
-            put(deepLinkInfo.name!!, deepLinkInfo.value!!)
-            put(IdpService.authnRequest, deepLinkInfo.authnRequest ?: "")
-            put(IdpService.generaCodice, "1")
+            put("cert", certificate.toHex())
+            put("authnRequest", deepLinkInfo.authnRequest ?: "")
         }
 
         idpService.callIdp(mapValues).subscribeOn(Schedulers.io())
@@ -83,17 +104,15 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
                 override fun onSuccess(idpResponse: Response<ResponseBody>) {
                     if (idpResponse.isSuccessful) {
                         CieIDSdkLogger.log("onSuccess")
-                        if (idpResponse.body() != null) {
-                            val codiceServer =
-                                idpResponse.body()!!.string().split(":".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()[1]
-                            if (!checkCodiceServer(codiceServer)) {
-                                callback?.onEvent(Event(EventError.GENERAL_ERROR))
+                        try{
+                            if (idpResponse.body() != null) {
+                                loginAuthenticationResponse = idpResponse.body()!!.string()
+                                val url = BuildConfig.BASE_URL_IDP+"Authn/X509MobileTLS13Second?challenge="+firma(loginAuthenticationResponse!!.toByteArray())+"&"+ deepLinkInfo.name+"="+deepLinkInfo.value
+                                callback?.onSuccess(url)
+                            } else {
+                                callback?.onEvent(Event(EventError.AUTHENTICATION_ERROR))
                             }
-                            val url =
-                                deepLinkInfo.nextUrl + "?" + deepLinkInfo.name + "=" + deepLinkInfo.value + "&login=1&codice=" + codiceServer
-                            callback?.onSuccess(url)
-
-                        } else {
+                        }catch (e: Exception){
                             callback?.onEvent(Event(EventError.AUTHENTICATION_ERROR))
                         }
                     } else {
@@ -143,6 +162,15 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
         return regex.matches(codiceServer)
     }
 
+    private fun firma(byteArray: ByteArray) : String{
+        idServizi = ias!!.getIdServizi()
+        ias!!.startSecureChannel(pin)
+        val pre = byteArrayOf(0x30, 0x31.toByte(), 0x30, 0x0D, 0x06, 0x09, 0x60, 0x86.toByte(), 0x48, 0x01, 0x65, 0x03, 0x04, 2, 1, 5, 0, 4, 0x20)
+        val sha = Sha256.encrypt(byteArray)
+        CieIDSdkLogger.log("challenge : $byteArray")
+        val append = AppUtil.appendByteArray(pre, sha)
+        return AppUtil.bytesToHex(ias!!.sign(append)!!)
+    }
 
     override fun onTagDiscovered(tag: Tag?) {
         try {
@@ -189,6 +217,14 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
      * start method must be called before accessing nfc features
      * */
     fun start(activity: Activity, cb: Callback) {
+        //Enable TLS SUPPORT
+        //TLS
+        try {
+            ProviderInstaller.installIfNeeded(activity.applicationContext)
+        } catch (throwable: Throwable) {
+            Log.e("SKD INIT", throwable.toString())
+        }
+
         callback = cb
         nfcAdapter = (activity.getSystemService(Context.NFC_SERVICE) as NfcManager).defaultAdapter
     }
