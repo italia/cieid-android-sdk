@@ -896,8 +896,8 @@ internal class Ias constructor(val isoDep: IsoDep) {
             0x80.toByte())
         val response = sendApdu(getKeyDoup, getKeyDuopData, null)
         val asn1 = Asn1Tag.parse(response.response, true)
-        caModule = asn1!!.child(0).child(0).Child(0, 0x81.toByte()).data
-        caPubExp = asn1.child(0).child(0).Child(1, 0x82.toByte()).data
+        caModule = asn1!!.child(0).child(0).childWithTagID(byteArrayOf(0x81.toByte()))!!.data
+        caPubExp = asn1.child(0).child(0).childWithTagID(byteArrayOf(0x82.toByte()))!!.data
         baExtAuth_PrivExp = byteArrayOf(
             0x18,
             0x6B,
