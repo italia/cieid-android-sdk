@@ -17,6 +17,7 @@ import android.util.Log
 import com.google.android.gms.security.ProviderInstaller
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.observers.DisposableSingleObserver
+import io.reactivex.plugins.RxJavaPlugins
 import io.reactivex.schedulers.Schedulers
 import it.ipzs.cieidsdk.BuildConfig
 import it.ipzs.cieidsdk.event.*
@@ -96,6 +97,12 @@ object CieIDSdk : NfcAdapter.ReaderCallback {
             put("cert", certificate.toHex())
             put("authnRequest", deepLinkInfo.authnRequest ?: "")
         }
+        
+        // handling all swallowed exception
+        RxJavaPlugins.setErrorHandler { error -> run {
+        CieIDSdkLogger.log("error handled by RxJavaPlugins $error")
+        callback?.onError(error)
+        }}
 
         idpService.callIdp(mapValues).subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
